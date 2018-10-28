@@ -1,0 +1,37 @@
+dist: trusty
+sudo: required
+
+language: cpp
+
+
+cache:
+  directories:
+  - $HOME/.ccache
+  - $HOME/deps
+  - /opt/cmake
+
+addons:
+  apt:
+    update: true
+    sources: &default_sources
+    - ubuntu-toolchain-r-test
+
+matrix:
+  include:
+  - os: linux
+    compiler: gcc
+
+install:
+- |
+  sudo apt remove cmake
+  sudo apt purge --auto-remove cmake
+
+  version=3.12
+  build=3
+  mkdir ~/temp
+  cd ~/temp
+  wget https://cmake.org/files/v$version/cmake-$version.$build-Linux-x86_64.sh
+  sudo mkdir /opt/cmake
+  sudo sh cmake-$version.$build-Linux-x86_64.sh --prefix=/opt/cmake
+
+  sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
