@@ -8,7 +8,7 @@ env: [OMP_NUM_THREADS=4]
 install: [
   "pip install --upgrade cmake",
   "cmake --version",
-  "g++ --version"
+  "g++ --version",
   "apt install opencl-header clinfo",
   "clinfo"
 ]
