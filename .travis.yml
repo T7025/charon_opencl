@@ -9,7 +9,7 @@ install: [
   "pip install --upgrade cmake",
   "cmake --version",
   "g++ --version",
-  "sudo apt install opencl-headers",
+  "sudo apt install ocl-icd-opencl-dev",
 #  "clinfo"
 ]
 
@@ -20,12 +20,12 @@ before_script: [
   "cd ${TRAVIS_BUILD_DIR}",
   "ls -Al",
   "mkdir build",
-  "cd build"
+  "cd build",
 ]
 
 script: [
   "cmake ..",
-  "cmake --build ."
+  "cmake --build .",
 ]
 #language: cpp
 
