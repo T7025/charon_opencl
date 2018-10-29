@@ -9,11 +9,14 @@ install: [
   "pip install --upgrade cmake",
   "cmake --version",
   "g++ --version",
-  "apt install opencl-header clinfo",
+  "sudo apt install opencl-header clinfo",
   "clinfo"
 ]
 
 before_script: [
+  "sudo ls /bin | grep -i gcc",
+  "sudo ls /bin | grep -i g++",
+
   "cd ${TRAVIS_BUILD_DIR}",
   "ls -Al",
   "mkdir build",
