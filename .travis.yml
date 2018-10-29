@@ -21,6 +21,9 @@ before_install: [
 ]
 
 script: [
+  "ls -Al",
+  "cd",
+  "ls -Al",
   "mkdir build",
   "cd build",
   "cmake ..",
