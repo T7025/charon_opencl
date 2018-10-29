@@ -21,8 +21,10 @@ install: [
   "cd .."
 ]
 
+
 script: [
-  "cd build/T7025/charon_opencl",
+  "cd ${TRAVIS_BUILD_DIR}",
+  "ls -Al",
   "mkdir build",
   "cd build",
   "cmake ..",
