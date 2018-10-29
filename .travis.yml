@@ -22,7 +22,7 @@ before_install: [
 
 script: [
   "ls -Al",
-  "cd",
+  "cd build",
   "ls -Al",
   "mkdir build",
   "cd build",
