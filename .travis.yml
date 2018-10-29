@@ -4,13 +4,17 @@ sudo: required
 language: python
 
 env: [OMP_NUM_THREADS=4]
+before_install: [
+  "sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y",
+  "sudo apt-get update",
+]
 
 install: [
   "pip install --upgrade cmake",
   "cmake --version",
   "g++ --version",
-  "sudo apt install ocl-icd-opencl-dev",
-#  "clinfo"
+  "sudo apt install -y ocl-icd-opencl-dev",
+  #  "clinfo"
 ]
 
 before_script: [
