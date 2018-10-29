@@ -7,26 +7,20 @@ env: [OMP_NUM_THREADS=4]
 
 install: [
   "pip install --upgrade cmake",
-#  "sudo apt remove cmake",
-#  "sudo apt purge --auto-remove cmake",
-#  "mkdir --verbose ~/cmake_download",
-#  "cd ~/cmake_download",
-#  "CMAKE_VERSION=3.12",
-#  "CMAKE_BUILD=3",
-#  "wget https://cmake.org/files/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.${CMAKE_BUILD}-Linux-x86_64.sh",
-#  "sudo mkdir /opt/cmake",
-#  "sudo sh cmake-${CMAKE_VERSION}.${CMAKE_BUILD}-Linux-x86_64.sh --prefix=/opt/cmake --skip-license",
-#  "sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake",
   "cmake --version",
-  "cd .."
+  "g++ --version"
+  "apt install opencl-header clinfo",
+  "clinfo"
 ]
 
-
-script: [
+before_script: [
   "cd ${TRAVIS_BUILD_DIR}",
   "ls -Al",
   "mkdir build",
-  "cd build",
+  "cd build"
+]
+
+script: [
   "cmake ..",
   "cmake --build ."
 ]
