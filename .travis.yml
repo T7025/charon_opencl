@@ -9,8 +9,8 @@ install: [
   "pip install --upgrade cmake",
   "cmake --version",
   "g++ --version",
-  "sudo apt install opencl-header clinfo",
-  "clinfo"
+  "sudo apt install opencl-headers",
+#  "clinfo"
 ]
 
 before_script: [
