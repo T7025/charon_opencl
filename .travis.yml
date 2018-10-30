@@ -25,7 +25,7 @@ before_script: [
   #  "sudo ls /bin | grep -i gcc",
   #  "sudo ls /bin | grep -i g++",
 
-  "cd ${TRAVIS_BUILD_DIR}/.travis",
+  "cd ~/.travis",
   "ls -Al",
   "cd ${TRAVIS_BUILD_DIR}",
   "ls -Al",
