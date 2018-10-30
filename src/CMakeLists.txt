@@ -1,3 +1,4 @@
+#include(buildExample.cmake)
 
 add_executable(
         charon
@@ -19,13 +20,13 @@ target_compile_definitions(
 )
 
 
-find_package(OpenCL 2.2 REQUIRED)
+find_package(OpenCL 1.2 REQUIRED)
 find_package(OpenMP REQUIRED)
 
 target_link_libraries(charon OpenCL::OpenCL)
 target_link_libraries(charon OpenMP::OpenMP_CXX)
 target_link_libraries(charon nlohmann_json::nlohmann_json)
-#target_link_libraries(charon pthread)
+target_link_libraries(charon pthread)
 
 
 get_target_property(charon_compile_options charon COMPILE_OPTIONS)
