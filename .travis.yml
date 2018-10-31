@@ -33,6 +33,12 @@ before_script: [
   "cd build",
 ]
 
+matrix:
+  include:
+  - os: linux
+    env: CXX_NAME='g++-7'
+    addons: {apt: {packages: [g++-6], ubuntu-toolchain-r-test}}
+
 script: [
   "cmake ..",
   "cmake --build .",
