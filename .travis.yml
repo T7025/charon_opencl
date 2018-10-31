@@ -13,7 +13,7 @@ install: [
   "pip install --upgrade cmake",
   "cmake --version",
   "g++ --version",
-  "sudo apt install -y ocl-icd-opencl-dev opencl-icd clinfo",
+  "sudo apt install -y ocl-icd-opencl-dev beignet clinfo",
   "clinfo",
   "cd",
   "ls -Al",
