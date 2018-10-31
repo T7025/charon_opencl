@@ -13,7 +13,7 @@ install: [
   "pip install --upgrade cmake",
   "cmake --version",
   "g++ --version",
-  "sudo apt install -y ocl-icd-opencl-dev clinfo",
+  "sudo apt install -y ocl-icd-opencl-dev opencl-icd clinfo",
   "clinfo",
   "cd",
   "ls -Al",
@@ -36,15 +36,15 @@ before_script: [
 matrix:
   include:
   - os: linux
-    env: CXX_NAME='g++-6'
+    env: CXX='g++-6'
     addons: {apt: {packages: [g++-6], sources: [ubuntu-toolchain-r-test]}}
 
   - os: linux
-    env: CXX_NAME='g++-7'
+    env: CXX='g++-7'
     addons: {apt: {packages: [g++-7], sources: [ubuntu-toolchain-r-test]}}
 
   - os: linux
-    env: CXX_NAME='g++-8'
+    env: CXX='g++-8'
     addons: {apt: {packages: [g++-8], sources: [ubuntu-toolchain-r-test]}}
 
 script: [
