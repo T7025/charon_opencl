@@ -1,12 +1,7 @@
 
-include(CTest)
-
 add_executable(
-        runUnitTests
+        charon_test
         main.cpp
-        #        BruteForceUniverseTest.cpp
-        #        BarnesHutUniverseTest.cpp
 )
-
-target_link_libraries(runUnitTests libcharon gtest gmock gtest_main)
-add_test(NAME runUnitTests COMMAND runUnitTests)
+target_link_libraries(charon_test Catch2::Catch2)
+catch_discover_tests(charon_test)

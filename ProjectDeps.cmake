@@ -1,4 +1,8 @@
 
+# Set FetchContent options
+option(FETCHCONTENT_QUIET "Enable silent mode (default 'ON')" ON)
+option(FETCHCONTENT_FULLY_DISCONNECTED "Don't attempt to download or update any content (default 'OFF')" ON)
+
 include(FetchContent)
 
 # Dependencies
@@ -12,6 +16,8 @@ if (NOT Catch2_POPULATED)
     FetchContent_Populate(Catch2)
     set(CATCH_BUILD_TESTING OFF CACHE BOOL "Build SelfTest project")
     add_subdirectory(${catch2_SOURCE_DIR} ${catch2_BINARY_DIR})
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${catch2_SOURCE_DIR}/contrib/")
+    include(Catch)
 endif ()
 
 FetchContent_Declare(
