@@ -36,8 +36,8 @@ before_script: [
 matrix:
   include:
   - os: linux
-    env: CXX_NAME='g++-7'
-    addons: {apt: {packages: [g++-6], ubuntu-toolchain-r-test}}
+    env: CXX_NAME='g++-6'
+    addons: {apt: {packages: [g++-6], sources: [ubuntu-toolchain-r-test]}}
 
 script: [
   "cmake ..",
