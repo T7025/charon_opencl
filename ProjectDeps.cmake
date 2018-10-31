@@ -1,7 +1,7 @@
 
 # Set FetchContent options
 option(FETCHCONTENT_QUIET "Enable silent mode (default 'ON')" ON)
-option(FETCHCONTENT_FULLY_DISCONNECTED "Don't attempt to download or update any content (default 'OFF')" ON)
+option(FETCHCONTENT_FULLY_DISCONNECTED "Don't attempt to download or update any content (default 'OFF')" OFF)
 
 include(FetchContent)
 
