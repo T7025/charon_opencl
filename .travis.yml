@@ -14,7 +14,7 @@ install: [
   "cmake --version",
   "g++ --version",
   "sudo apt install -y ocl-icd-opencl-dev beignet clinfo",
-  "clinfo",
+#  "clinfo",
   "cd",
   "ls -Al",
 ]
