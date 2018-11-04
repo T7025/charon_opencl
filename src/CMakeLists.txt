@@ -1,8 +1,20 @@
 #include(buildExample.cmake)
 
+include_directories(.)
+
+add_library(
+        libcharon
+        base/Util.hpp
+        settings/Settings.cpp
+        settings/Settings.hpp
+)
+
 add_executable(
         charon
         main.cpp
+        simulator/Simulator.cpp
+        simulator/Simulator.hpp
+        #        settings/Settings.cpp settings/Settings.hpp base/Util.hpp
 )
 
 target_compile_features(charon PUBLIC cxx_std_14)
@@ -10,13 +22,14 @@ target_compile_features(charon PUBLIC cxx_std_14)
 target_compile_options(
         charon PUBLIC
         -Wall -Wextra
-        "$<$<CONFIG:DEBUG>:-Og>"
-        "$<$<CONFIG:RELEASE>:-O3 -march=native -funroll-loops -ftree-vectorize -fopt-info-vec-all=vecreport.txt>"
+        "$<$<CONFIG:DEBUG>:" -Og ">"
+        "$<$<CONFIG:RELEASE>:" -O3 -march=native -funroll-loops -ftree-vectorize -fopt-info-vec-all=vecreport.txt ">"
 )
 target_compile_definitions(
-        charon PRIVATE
+        charon PUBLIC
         CL_HPP_MINIMUM_OPENCL_VERSION=200  # Minimum OpenCL version: 2.0.0
         CL_HPP_ENABLE_EXCEPTIONS  # Enables exceptions for use in the C++ bindings header.
+        $<$<BOOL:CHARON_USE_DOUBLE>: CHARON_USE_DOUBLE >
 )
 
 
@@ -28,6 +41,7 @@ target_link_libraries(charon OpenMP::OpenMP_CXX)
 target_link_libraries(charon nlohmann_json::nlohmann_json)
 target_link_libraries(charon pthread)
 
+target_link_libraries(charon libcharon)
 
 get_target_property(charon_compile_options charon COMPILE_OPTIONS)
 message("-- Charon compile options: ${charon_compile_options}")

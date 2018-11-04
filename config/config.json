@@ -1,0 +1,6 @@
+{
+  "numBodies": 500,
+  "timeStep": 0.01,
+  "numIterations": 200,
+  "snapshotTime": 10
+}
