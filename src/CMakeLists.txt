@@ -5,8 +5,11 @@ include_directories(.)
 add_library(
         libcharon
         base/Util.hpp
+        base/Universe.hpp
         settings/Settings.cpp
         settings/Settings.hpp
+        barnes-hut/cpu-single-thread/Universe.cpp
+        barnes-hut/cpu-single-thread/Universe.hpp
 )
 
 add_executable(

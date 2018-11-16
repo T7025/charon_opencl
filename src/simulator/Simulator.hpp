@@ -2,11 +2,11 @@
 // Created by thomas on 01/11/18.
 //
 
-#ifndef CHARON_OPENCL_SIMULATOR_HPP
-#define CHARON_OPENCL_SIMULATOR_HPP
+#pragma once
 
 
 #include <memory>
+#include <settings/Settings.hpp>
 
 class Simulator {
 public:
@@ -22,6 +22,3 @@ private:
 
 
 };
-
-
-#endif //CHARON_OPENCL_SIMULATOR_HPP

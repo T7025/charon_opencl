@@ -2,8 +2,7 @@
 // Created by thomas on 03/11/18.
 //
 
-#ifndef CHARON_OPENCL_UTIL_HPP
-#define CHARON_OPENCL_UTIL_HPP
+#pragma once
 
 #ifdef CHARON_USE_DOUBLE
 using fp = double;
@@ -11,4 +10,11 @@ using fp = double;
 using fp = float;
 #endif
 
-#endif //CHARON_OPENCL_UTIL_HPP
+enum class Algorithm {
+    bruteForce,
+    barnesHut
+};
+
+enum class Platform {
+    cpuSingleThread
+};

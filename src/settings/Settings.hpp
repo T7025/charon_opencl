@@ -2,8 +2,7 @@
 // Created by thomas on 02/11/18.
 //
 
-#ifndef CHARON_OPENCL_SETTINGS_HPP
-#define CHARON_OPENCL_SETTINGS_HPP
+#pragma once
 
 
 #include <string>
@@ -33,6 +32,3 @@ public:
 
 
 };
-
-
-#endif //CHARON_OPENCL_SETTINGS_HPP
