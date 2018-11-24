@@ -8,7 +8,7 @@
 #include <base/Universe.hpp>
 
 template<>
-class Universe<Algorithm::bruteForce, Platform::cpuSingleThread> {
+class Universe<Algorithm::bruteForce, Platform::cpuSingleThread, typename FP> {
 public:
     Universe();
 

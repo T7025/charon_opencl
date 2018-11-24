@@ -3,7 +3,3 @@
 //
 
 #include "Universe.hpp"
-
-void Universe<Algorithm::bruteForce, Platform::cpuSingleThread>::calculateNextStep() {
-
-}

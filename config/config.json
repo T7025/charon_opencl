@@ -1,4 +1,6 @@
 {
+  "resulstsDir": "results",
+  "resultsFilenamePrefix": "out_",
   "numBodies": 500,
   "timeStep": 0.01,
   "numIterations": 200,

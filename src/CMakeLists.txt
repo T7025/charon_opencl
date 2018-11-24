@@ -6,26 +6,37 @@ add_library(
         libcharon
         base/Util.hpp
         base/Universe.hpp
-        settings/Settings.cpp
-        settings/Settings.hpp
         barnes-hut/cpu-single-thread/Universe.cpp
         barnes-hut/cpu-single-thread/Universe.hpp
+        settings/Settings.cpp
+        settings/Settings.hpp
+        simulator/Simulator.cpp
+        simulator/Simulator.hpp
+        base/BodyGenerator.hpp
+        base/Vec3.hpp
+        BodyGenerators/CubeBodyGenerator.cpp
+        BodyGenerators/CubeBodyGenerator.hpp
 )
+target_compile_features(libcharon PUBLIC cxx_std_20)
+
+target_link_libraries(libcharon OpenCL::OpenCL)
+target_link_libraries(libcharon OpenMP::OpenMP_CXX)
+target_link_libraries(libcharon nlohmann_json::nlohmann_json)
+target_link_libraries(libcharon pthread)
 
 add_executable(
         charon
         main.cpp
-        simulator/Simulator.cpp
-        simulator/Simulator.hpp
         #        settings/Settings.cpp settings/Settings.hpp base/Util.hpp
 )
 
-target_compile_features(charon PUBLIC cxx_std_14)
+target_compile_features(charon PUBLIC cxx_std_20)
 
 target_compile_options(
         charon PUBLIC
         -Wall -Wextra
         "$<$<CONFIG:DEBUG>:" -Og ">"
+        # -fopt-info-vec-optimized/missed/note/all
         "$<$<CONFIG:RELEASE>:" -O3 -march=native -funroll-loops -ftree-vectorize -fopt-info-vec-all=vecreport.txt ">"
 )
 target_compile_definitions(

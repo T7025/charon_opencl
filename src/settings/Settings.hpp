@@ -10,15 +10,17 @@
 
 class Settings {
 public:
+    Settings(const std::string &string_settingsFilePrefix, const std::string &settingsFile);
+
     bool enableFileOutput;
-    std::string resultsDirectory;
+    std::string resultsDir;
     std::string resultsFilenamePrefix;
 
     unsigned nrOfSteps;  ///< Total nr. of steps to simulate.
     unsigned snapshotDelta;  ///< Amount of steps between each snapshot of the universe.
     std::string algorithm;
     std::string platform;
-    std::string implementationType;  ///< What kind of implementation will be used (Brute force vs. Barnes-Hut, CPU vs. GPU)
+    std::string floatingPointType; ///< float or double.
     std::string universeShape;  ///< Initial shape of the universe.
 
     fp barnesHutCutoff;  ///< When using a Barnes-Hut implementation.

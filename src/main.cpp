@@ -2,8 +2,19 @@
 #include <CL/cl.hpp>
 #include <nlohmann/json.hpp>
 #include <iostream>
+#include <settings/Settings.hpp>
 
 int main() {
+    std::ios_base::sync_with_stdio(false);
+
+    std::string settingsFilePrefix{"config"};
+    settingsFilePrefix += '/';
+    std::string settingsFile{"config.json"};
+    auto settings = std::make_shared<Settings>(settingsFilePrefix, settingsFile);
+
+    std::cout << settings->resultsDir << "\n";
+
+
     nlohmann::json j;
     j["pi"] = 3.14;
     j["list"] = {1, 2, 3};
