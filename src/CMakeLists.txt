@@ -17,7 +17,7 @@ add_library(
         BodyGenerators/CubeBodyGenerator.cpp
         BodyGenerators/CubeBodyGenerator.hpp
 )
-target_compile_features(libcharon PUBLIC cxx_std_20)
+target_compile_features(libcharon PUBLIC cxx_std_17)
 
 target_link_libraries(libcharon OpenCL::OpenCL)
 target_link_libraries(libcharon OpenMP::OpenMP_CXX)
@@ -30,7 +30,7 @@ add_executable(
         #        settings/Settings.cpp settings/Settings.hpp base/Util.hpp
 )
 
-target_compile_features(charon PUBLIC cxx_std_20)
+target_compile_features(charon PUBLIC cxx_std_17)
 
 target_compile_options(
         charon PUBLIC
