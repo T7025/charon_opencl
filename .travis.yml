@@ -1,41 +1,16 @@
 dist: trusty
-#sudo: required
 
 language: python
 
 env: [OMP_NUM_THREADS=4]
 
-#before_install: [
-#  "sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y",
-#  "sudo apt-get update",
-#]
-#addons: {
-#  apt: {
-#    packages: [ocl-icd-opencl-dev, beignet],
-#    sources: [ubuntu-toolchain-r-test],
-#    update: true
-#  }
-#}
-
-
-
 install: [
   "pip install --upgrade cmake",
   "cmake --version",
   "g++ --version",
-#  "sudo apt install -y ocl-icd-opencl-dev beignet",  # clinfo
-#  "cd",
-#  "ls -Al",
 ]
 
 before_script: [
-  #  "cd /bin",
-  #  "ls -Al",
-  #  "sudo ls /bin | grep -i gcc",
-  #  "sudo ls /bin | grep -i g++",
-
-  #  "cd ~/.travis",
-  #  "ls -Al",
   "cd ${TRAVIS_BUILD_DIR}",
   "ls -Al",
   "mkdir build",
@@ -60,42 +35,3 @@ script: [
   "cmake -DCMAKE_BUILD_TYPE=RELEASE ..",
   "cmake --build .",
 ]
-#language: cpp
-
-#matrix:
-#  include:
-#
-#  # GCC 8
-#  - env: UNIT_TESTS=true COMPILER=g++-8 ENABLE_MEMCHECK=true
-#    addons: { apt: { packages: ["g++-8", "valgrind"], sources: ["ubuntu-toolchain-r-test"] } }
-#
-#  - env: UNIT_TESTS=true COMPILER=default CMAKE_OPTIONS="-DOMP_NUM_THREADS=4"
-#    addons: *defaults
-#
-#install:
-#############################################################################
-## All the dependencies are installed in ${HOME}/deps/
-#############################################################################
-#- DEPS_DIR="${HOME}/deps"
-#- mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
-#
-#############################################################################
-## Setup default versions and override CXX set by Travis if needed
-#############################################################################
-#- if [[ "${COMPILER}" == "default" ]]; then COMPILER=g++-8.0; fi
-#
-#- if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
-#- ${CXX} --version
-#
-#############################################################################
-## Install a recent CMake
-#############################################################################
-#- |
-#  if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-#    CMAKE_URL="https://cmake.org/files/v3.10/cmake-3.10.0-Linux-x86_64.tar.gz"
-#    mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-#    export PATH=${DEPS_DIR}/cmake/bin:${PATH}
-#  else
-#    brew install cmake || brew upgrade cmake
-#  fi
-#- cmake --version
