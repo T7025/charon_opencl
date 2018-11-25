@@ -1,32 +1,41 @@
 dist: trusty
-sudo: required
+#sudo: required
 
 language: python
 
 env: [OMP_NUM_THREADS=4]
-before_install: [
-  "sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y",
-  "sudo apt-get update",
-]
+
+#before_install: [
+#  "sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y",
+#  "sudo apt-get update",
+#]
+addons: {
+  apt: {
+    packages: [ocl-icd-opencl-dev, beignet],
+    sources: [ubuntu-toolchain-r-test],
+    update: true
+  }
+}
+
+
 
 install: [
   "pip install --upgrade cmake",
   "cmake --version",
   "g++ --version",
-  "sudo apt install -y ocl-icd-opencl-dev beignet clinfo",
-#  "clinfo",
-  "cd",
-  "ls -Al",
+#  "sudo apt install -y ocl-icd-opencl-dev beignet",  # clinfo
+#  "cd",
+#  "ls -Al",
 ]
 
 before_script: [
-  "cd /bin",
-  "ls -Al",
+  #  "cd /bin",
+  #  "ls -Al",
   #  "sudo ls /bin | grep -i gcc",
   #  "sudo ls /bin | grep -i g++",
 
-  "cd ~/.travis",
-  "ls -Al",
+  #  "cd ~/.travis",
+  #  "ls -Al",
   "cd ${TRAVIS_BUILD_DIR}",
   "ls -Al",
   "mkdir build",
@@ -35,9 +44,9 @@ before_script: [
 
 matrix:
   include:
-  - os: linux
-    env: CXX='g++-6'
-    addons: {apt: {packages: [g++-6], sources: [ubuntu-toolchain-r-test]}}
+  #  - os: linux
+  #    env: CXX='g++-6'
+  #    addons: {apt: {packages: [g++-6], sources: [ubuntu-toolchain-r-test]}}
 
   - os: linux
     env: CXX='g++-7'
