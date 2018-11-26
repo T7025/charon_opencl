@@ -36,7 +36,7 @@ matrix:
   - os: linux
     env: CXX='clang++-6.0'
     addons: {apt: {packages: [clang-6.0, ocl-icd-opencl-dev, beignet],
-                   sources: [ubuntu-toolchain-r-test],
+                   sources: [ubuntu-toolchain-r-test, llvm-toolchain-trusty],
                    update: true}}
 
 script: [
