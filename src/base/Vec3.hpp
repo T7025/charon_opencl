@@ -138,6 +138,6 @@ struct Vec3 {
 
 template <typename FP>
 std::ostream &operator<<(std::ostream &out, const Vec3<FP> &vec) {
-    out << vec.x << ',', vec.y << ',' << vec.z;
+    out << vec.x << ',' << vec.y << ',' << vec.z;
     return out;
 }

@@ -8,26 +8,26 @@
 #include <base/Universe.hpp>
 #include <base/Vec3.hpp>
 #include <vector>
-#include <ostream>
+#include <iostream>
 #include <cassert>
-
 
 
 template<typename FP>
 class Universe<Algorithm::bruteForce, Platform::cpuSingleThread, FP> : public UniverseBase {
 public:
-    explicit Universe(Settings settings) : UniverseBase{settings} {};
+    explicit Universe(Settings settings) : UniverseBase{std::move(settings)} {};
 
     void init(std::unique_ptr<BodyGenerator> bodyGenerator) override {
-        for (int i = 0; i < settings().numberOfBodies; ++i) {
+        for (unsigned i = 0; i < settings().numberOfBodies; ++i) {
 //            double m;
 //            Vec3<FP> pos, vel;
 //            std::tie(m, pos, vel) = bodyGenerator->getBody();
+            std::cout << "test " << settings().numberOfBodies<<"\n";
             auto [m, pos, vel] = bodyGenerator->getBody();
             mass.emplace_back(m);
             position.emplace_back(pos);
             velocity.emplace_back(vel);
-            acceleration.emplace_back({0,0,0});
+            acceleration.emplace_back(0,0,0);
         }
 
 

@@ -1,19 +1,54 @@
 #include <omp.h>
 #include <CL/cl.hpp>
-#include <nlohmann/json.hpp>
 #include <iostream>
 #include <settings/Settings.hpp>
+#include <barnes-hut/cpu-single-thread/Universe.hpp>
+#include <BodyGenerators/SphereBodyGenerator.hpp>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 int main() {
-    std::ios_base::sync_with_stdio(false);
+//    std::ios_base::sync_with_stdio(false);
 
     std::string settingsFilePrefix{"config"};
     settingsFilePrefix += '/';
     std::string settingsFile{"config.json"};
-    auto settings = std::make_shared<Settings>(settingsFilePrefix, settingsFile);
+    /*Settings settings(settingsFilePrefix, settingsFile);
 
-    std::cout << settings->resultsDir << "\n";
+    std::cout << settings.resultsDir << "\n";
+    std::cout << settings.algorithm << "\n";
+    std::cout << settings.numberOfBodies << "\n";
 
+    settings.init(settingsFilePrefix, settingsFile);
+    std::cout << settings.resultsDir << "\n";
+    std::cout << settings.algorithm << "\n";
+    std::cout << settings.numberOfBodies << "\n";
+
+    settings.numberOfBodies = 5;
+    std::cout << settings.numberOfBodies << "\n";*/
+
+    std::ifstream input{settingsFilePrefix + settingsFile};
+    if (input) {
+        nlohmann::json json{};
+        input >> json;
+
+        Settings settings{json};
+        std::cout << settings.resultsDir << "\n";
+        std::cout << settings.algorithm << "\n";
+        std::cout << settings.numberOfBodies << "\n";
+        std::cout << settings.getNr() << "\n";
+    } else {
+        throw std::runtime_error{"File \"" + settingsFilePrefix + settingsFile + "\" not found."};
+    }
+
+
+/*    Universe<Algorithm::bruteForce, Platform::cpuSingleThread, double> universe{settings};
+
+    universe.init(std::make_unique<SphereBodyGenerator>(settings));
+    {
+        std::ofstream out{settings.resultsDir + '/' + settings.resultsFilenamePrefix + "01.txt"};
+        universe.logInternalState(out);
+    }
 
     nlohmann::json j;
     j["pi"] = 3.14;
@@ -33,5 +68,5 @@ int main() {
     std::cout << "Available OpenCL platform(s): " << all_platforms[0].getInfo<CL_PLATFORM_NAME>();
     for (unsigned i = 1; i < all_platforms.size(); ++i) {
         std::cout << ", " << all_platforms[i].getInfo<CL_PLATFORM_NAME>();
-    }
+    }*/
 }

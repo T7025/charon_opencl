@@ -8,33 +8,38 @@
 #include <sstream>
 #include "Settings.hpp"
 
-Settings::Settings(const std::string &string_settingsFilePrefix, const std::string &settingsFile) {
+Settings::Settings(const nlohmann::json &json) :
+        enableFileOutput{json.value("enableFileOutput", false)},
+        resultsDir{json.value("resultsDir", "results")},
+        resultsFilenamePrefix{json.value("resultsFilenamePrefix", "out_")},
 
-    std::ifstream input{string_settingsFilePrefix + settingsFile};
-    if (input) {
-        nlohmann::json json;
-        input >> json;
+        nrOfSteps{json.value("nrOfSteps", 0u)},
+        snapshotDelta{json.value("snapshotDelta", 0u)},
+        algorithm{json.value("algorithm", "brute-force")},
+        platform{json.value("platform", "cpu-single-thread")},
+        floatingPointType{json.value("floatingPointType", "double")},
+        universeShape{json.value("universeShape", "")},
 
-        enableFileOutput = json.value("enableFileOutput", false);
-        resultsDir = json.value("resultsDir", "results");
-        resultsFilenamePrefix = json.value("resultsFilenamePrefix", "out_");
-        nrOfSteps = json.value("nrOfSteps", 0);
+        barnesHutCutoff{json.value("barnesHutCutoff", fp(0.7))},
 
-        snapshotDelta = json.value("snapshotDelta", 0);
-        algorithm = json.value("algorithm", "brute-force");
-        platform = json.value("platform", "cpu-single-thread");
-        floatingPointType = json.value("floatingPointType", "double");
-        universeShape = json.value("universeShape", "");
+        rngSeed{json.value("rngSeed", 1302u)},
+        timeStep{json.value("timeStep", fp(0.001))},
 
-        barnesHutCutoff = json.value("barnesHutCutoff", 0.7);
+        numberOfBodies{json.value("numberOfBodies", 2u)},
+//        numberOfBodies{2u},
 
-        rngSeed = json.value("rngSeed", 0);
-        timeStep = json.value("timeStep", 0.001);
+        universeRadius{json.value("universeRadius", fp(1))} {}
 
-        numberOfBodies = json.value("numberOfBodies", 2u);
 
-    }
-    else {
-        throw std::runtime_error{"File \"" + string_settingsFilePrefix + settingsFile + "\" not found."};
-    }
-}
+Settings::Settings(const std::string &settingsFilePrefix, const std::string &settingsFile) :
+        Settings{[&] {
+            nlohmann::json json;
+            std::ifstream input{settingsFilePrefix + settingsFile};
+            if (input) {
+                input >> json;
+            } else {
+                throw std::runtime_error{"File \"" + settingsFilePrefix + settingsFile + "\" not found."};
+            }
+            return json;
+        }()} {}
+

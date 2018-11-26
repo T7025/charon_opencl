@@ -1,7 +1,7 @@
 {
-  "resulstsDir": "results",
+  "resultsDir": "results",
   "resultsFilenamePrefix": "out_",
-  "numBodies": 500,
+  "numBodies": 50,
   "timeStep": 0.01,
   "numIterations": 200,
   "snapshotTime": 10

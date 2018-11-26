@@ -6,31 +6,42 @@
 
 
 #include <string>
+#include <memory>
 #include <base/Util.hpp>
+#include <nlohmann/json.hpp>
+
 
 class Settings {
 public:
-    Settings(const std::string &string_settingsFilePrefix, const std::string &settingsFile);
+    Settings(const std::string &settingsFilePrefix, const std::string &settingsFile);
+/*
 
-    bool enableFileOutput;
-    std::string resultsDir;
-    std::string resultsFilenamePrefix;
+    void init(const std::string &settingsFilePrefix, const std::string &settingsFile);
+*/
 
-    unsigned nrOfSteps;  ///< Total nr. of steps to simulate.
-    unsigned snapshotDelta;  ///< Amount of steps between each snapshot of the universe.
-    std::string algorithm;
-    std::string platform;
-    std::string floatingPointType; ///< float or double.
-    std::string universeShape;  ///< Initial shape of the universe.
+    explicit Settings(const nlohmann::json &json);
 
-    fp barnesHutCutoff;  ///< When using a Barnes-Hut implementation.
+    const bool enableFileOutput;
+    const std::string resultsDir;
+    const std::string resultsFilenamePrefix;
 
-    long rngSeed;
-    fp timeStep;
+    const unsigned nrOfSteps;  ///< Total nr. of steps to simulate.
+    const unsigned snapshotDelta;  ///< Amount of steps between each snapshot of the universe.
+    const std::string algorithm;
+    const std::string platform;
+    const std::string floatingPointType; ///< float or double.
+    const std::string universeShape;  ///< Initial shape of the universe.
 
-    unsigned numberOfBodies;  ///< Number of bodies to simulate.
+    const fp barnesHutCutoff;  ///< When using a Barnes-Hut implementation.
 
-    fp universeRadius;  ///< Radius of the universe in km
+    const unsigned long rngSeed;
+    const fp timeStep;
+
+    const unsigned numberOfBodies;  ///< Number of bodies to simulate.
+
+    const fp universeRadius;  ///< Radius of the universe.
+
+    unsigned getNr() { return numberOfBodies; }
 
 
 };

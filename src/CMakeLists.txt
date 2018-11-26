@@ -14,8 +14,8 @@ add_library(
         simulator/Simulator.hpp
         base/BodyGenerator.hpp
         base/Vec3.hpp
-        BodyGenerators/CubeBodyGenerator.cpp
-        BodyGenerators/CubeBodyGenerator.hpp
+        BodyGenerators/SphereBodyGenerator.cpp
+        BodyGenerators/SphereBodyGenerator.hpp
 )
 target_compile_features(libcharon PUBLIC cxx_std_17)
 
