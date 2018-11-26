@@ -1,11 +1,17 @@
-#include <omp.h>
-#include <CL/cl.hpp>
+//#include <omp.h>
+//#include <CL/cl.hpp>
 #include <iostream>
 #include <settings/Settings.hpp>
 #include <barnes-hut/cpu-single-thread/Universe.hpp>
 #include <BodyGenerators/SphereBodyGenerator.hpp>
 #include <fstream>
-#include <nlohmann/json.hpp>
+#include <filesystem>
+#include <simulator/Simulator.hpp>
+
+//SCENARIO("settings parsing", "[settings]") {
+//void SCENARIO() {
+//    GIVEN("A ")
+//}
 
 int main() {
 //    std::ios_base::sync_with_stdio(false);
@@ -13,43 +19,22 @@ int main() {
     std::string settingsFilePrefix{"config"};
     settingsFilePrefix += '/';
     std::string settingsFile{"config.json"};
-    /*Settings settings(settingsFilePrefix, settingsFile);
+    Settings settings(settingsFilePrefix, settingsFile);
 
-    std::cout << settings.resultsDir << "\n";
-    std::cout << settings.algorithm << "\n";
-    std::cout << settings.numberOfBodies << "\n";
-
-    settings.init(settingsFilePrefix, settingsFile);
-    std::cout << settings.resultsDir << "\n";
-    std::cout << settings.algorithm << "\n";
-    std::cout << settings.numberOfBodies << "\n";
-
-    settings.numberOfBodies = 5;
-    std::cout << settings.numberOfBodies << "\n";*/
-
-    std::ifstream input{settingsFilePrefix + settingsFile};
-    if (input) {
-        nlohmann::json json{};
-        input >> json;
-
-        Settings settings{json};
-        std::cout << settings.resultsDir << "\n";
-        std::cout << settings.algorithm << "\n";
-        std::cout << settings.numberOfBodies << "\n";
-        std::cout << settings.getNr() << "\n";
-    } else {
-        throw std::runtime_error{"File \"" + settingsFilePrefix + settingsFile + "\" not found."};
-    }
-
-
-/*    Universe<Algorithm::bruteForce, Platform::cpuSingleThread, double> universe{settings};
+    Universe<Algorithm::bruteForce, Platform::cpuSingleThread, double> universe{settings};
 
     universe.init(std::make_unique<SphereBodyGenerator>(settings));
     {
+        if (!std::filesystem::exists(settings.resultsDir)) {
+            std::filesystem::create_directory(settings.resultsDir);
+        }
         std::ofstream out{settings.resultsDir + '/' + settings.resultsFilenamePrefix + "01.txt"};
         universe.logInternalState(out);
     }
 
+    Simulator simulator{settings};
+    simulator.setup();
+/*
     nlohmann::json j;
     j["pi"] = 3.14;
     j["list"] = {1, 2, 3};

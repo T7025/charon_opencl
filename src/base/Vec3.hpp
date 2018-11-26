@@ -16,7 +16,7 @@ struct Vec3 {
     Vec3(FP x, FP y, FP z) : x{x}, y{y}, z{z} {};
     
     template <typename FP2>
-    explicit Vec3(Vec3<FP2> vec) : Vec3{vec.x, vec.y, vec.z} {};
+    explicit Vec3(Vec3<FP2> vec) : Vec3{(FP)vec.x, (FP)vec.y, (FP)vec.z} {};
 
     Vec3 &operator+=(const Vec3 &other) {
         x += other.x;

@@ -19,10 +19,6 @@ public:
 
     void init(std::unique_ptr<BodyGenerator> bodyGenerator) override {
         for (unsigned i = 0; i < settings().numberOfBodies; ++i) {
-//            double m;
-//            Vec3<FP> pos, vel;
-//            std::tie(m, pos, vel) = bodyGenerator->getBody();
-            std::cout << "test " << settings().numberOfBodies<<"\n";
             auto [m, pos, vel] = bodyGenerator->getBody();
             mass.emplace_back(m);
             position.emplace_back(pos);

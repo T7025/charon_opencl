@@ -8,17 +8,17 @@
 #include <memory>
 #include <settings/Settings.hpp>
 
+class UniverseBase;
+
 class Simulator {
 public:
-    Simulator(std::shared_ptr<Settings> settings);
+    explicit Simulator(Settings settings);
 
     void setup();
 
     void run();
 
 private:
-    const unsigned nrOfSteps;
-    const unsigned snapshotDelta;
-
-
+    Settings settings;
+    std::unique_ptr<UniverseBase> universe;
 };

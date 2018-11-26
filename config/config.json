@@ -1,6 +1,8 @@
 {
   "resultsDir": "results",
   "resultsFilenamePrefix": "out_",
+  "algorithm": "brute-force",
+  "platform": "cpu-single-thread",
   "numBodies": 50,
   "timeStep": 0.01,
   "numIterations": 200,

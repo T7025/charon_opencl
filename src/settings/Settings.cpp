@@ -2,10 +2,7 @@
 // Created by thomas on 02/11/18.
 //
 
-#include <nlohmann/json.hpp>
 #include <fstream>
-#include <iostream>
-#include <sstream>
 #include "Settings.hpp"
 
 Settings::Settings(const nlohmann::json &json) :
@@ -26,9 +23,10 @@ Settings::Settings(const nlohmann::json &json) :
         timeStep{json.value("timeStep", fp(0.001))},
 
         numberOfBodies{json.value("numberOfBodies", 2u)},
-//        numberOfBodies{2u},
 
-        universeRadius{json.value("universeRadius", fp(1))} {}
+        universeRadius{json.value("universeRadius", fp(1))},
+        totalMass{1.0},
+        G{1.0} {}
 
 
 Settings::Settings(const std::string &settingsFilePrefix, const std::string &settingsFile) :

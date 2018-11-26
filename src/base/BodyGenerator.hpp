@@ -25,12 +25,13 @@
 //extern template class Body<double>;
 
 #include <settings/Settings.hpp>
+#include <random>
 #include "Vec3.hpp"
 
 //template<typename FP>
 class BodyGenerator {
 public:
-    explicit BodyGenerator(Settings settings) : settings_{std::move(settings)} {};
+    explicit BodyGenerator(Settings settings) : settings{std::move(settings)}, engine{settings.rngSeed} {};
 //    struct Vec3 {
 //        double x, y, z;
 //    };
@@ -43,12 +44,11 @@ public:
 
     virtual ~BodyGenerator() = default;
 
-    virtual std::tuple<double, Vec3<double>, Vec3<double>> getBody() = 0;
+    virtual std::tuple<fp, Vec3<fp>, Vec3<fp>> getBody() = 0;
 
 protected:
-    Settings settings() { return settings_; }
-private:
-    Settings settings_;
+    Settings settings;
+    std::mt19937_64 engine;
 };
 
 
