@@ -42,6 +42,5 @@ matrix:
 script: [
   "cmake -DCMAKE_BUILD_TYPE=RELEASE ..",
   "cmake --build .",
-  "cd ..",
-  "./build/test"
+  "ctest",
 ]
