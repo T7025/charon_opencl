@@ -36,10 +36,12 @@ matrix:
   - os: linux
     env: CXX='clang++-6.0'
     addons: {apt: {packages: [clang-6.0, libstdc++-7-dev, ocl-icd-opencl-dev, beignet],
-                   sources: [ubuntu-toolchain-r-test, llvm-toolchain-trusty],
+                   sources: [ubuntu-toolchain-r-test],
                    update: true}}
 
 script: [
   "cmake -DCMAKE_BUILD_TYPE=RELEASE ..",
   "cmake --build .",
+  "cd ..",
+  "./build/test"
 ]
