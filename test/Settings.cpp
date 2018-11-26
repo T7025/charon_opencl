@@ -25,7 +25,7 @@ SCENARIO("Settings parsing from json object", "[settings]") {
 
 SCENARIO("Settings parsing from json file", "[settings]") {
     GIVEN("A directory and filename referencing a json config file") {
-        std::string settingsFilePrefix{"test"};
+        std::string settingsFilePrefix{"."};
         settingsFilePrefix += '/';
         std::string settingsFile{"testConfig.json"};
 
