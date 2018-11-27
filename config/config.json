@@ -1,8 +1,9 @@
 {
   "resultsDir": "results",
   "resultsFilenamePrefix": "out_",
-  "algorithm": "brute-force",
+  "algorithm": "barnes-hut",
   "platform": "cpu-single-thread",
+  "floatingPointType": "float",
   "numBodies": 50,
   "timeStep": 0.01,
   "numIterations": 200,

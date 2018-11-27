@@ -42,7 +42,7 @@ public:
     explicit Universe(Settings settings) : UniverseBase{std::move(settings)} {};
 
 //    template <typename BodyGen>
-//    void init(std::unique_ptr<BodyGenerator> bodyGenerator) {};
+//    void init(std::unique_ptr<BodyGenerator> bodyGeneratorType) {};
 //
 //    virtual void logInternalState(std::ostream &out) = 0;
 //

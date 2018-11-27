@@ -15,7 +15,7 @@ Settings::Settings(const nlohmann::json &json) :
         algorithm{json.value("algorithm", "brute-force")},
         platform{json.value("platform", "cpu-single-thread")},
         floatingPointType{json.value("floatingPointType", "double")},
-        universeShape{json.value("universeShape", "")},
+        bodyGeneratorType{json.value("bodyGeneratorType", "sphere")},
 
         barnesHutCutoff{json.value("barnesHutCutoff", fp(0.7))},
 

@@ -27,7 +27,7 @@ public:
     const std::string algorithm;
     const std::string platform;
     const std::string floatingPointType; ///< float or double.
-    const std::string universeShape;  ///< Initial shape of the universe.
+    const std::string bodyGeneratorType;  ///< Defines initial shape of the universe.
 
     const fp barnesHutCutoff;  ///< Used when using a Barnes-Hut implementation.
 
