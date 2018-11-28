@@ -16,7 +16,7 @@
 //template<enum Algorithm, enum Platform>
 class UniverseBase {
 public:
-    explicit UniverseBase(Settings settings) : settings_{std::move(settings)} {};
+    explicit UniverseBase(Settings settings) : settings{std::move(settings)} {};
 
     virtual ~UniverseBase() = default;
 
@@ -27,25 +27,14 @@ public:
 
     virtual void logInternalState(std::ostream &out) = 0;
 
-    virtual void step() = 0;
+    virtual void step(unsigned int numSteps) = 0;
 
 protected:
-    const Settings &settings() const { return settings_; }
-
-private:
-    Settings settings_;
+    Settings settings;
 };
 
 template <enum Algorithm algorithm, enum Platform platform, typename FP>
 class Universe : public UniverseBase {
 public:
     explicit Universe(Settings settings) : UniverseBase{std::move(settings)} {};
-
-//    template <typename BodyGen>
-//    void init(std::unique_ptr<BodyGenerator> bodyGeneratorType) {};
-//
-//    virtual void logInternalState(std::ostream &out) = 0;
-//
-//    virtual void step() = 0;
-
 };

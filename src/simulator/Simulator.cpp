@@ -7,6 +7,8 @@
 //#include <base/Universe.hpp>
 #include <barnes-hut/cpu-single-thread/Universe.hpp>
 #include <BodyGenerators/SphereBodyGenerator.hpp>
+#include <filesystem>
+#include <fstream>
 
 
 // Adapted from the example at https://en.cppreference.com/w/cpp/utility/integer_sequence
@@ -124,9 +126,47 @@ Simulator::Simulator(Settings settings) : settings{std::move(settings)}, univers
         throw std::runtime_error{createErrorString("bodyGeneratorType", settings.bodyGeneratorType, ss.str())};
     }
     universe->init(iter->second());
+
+    if (!std::filesystem::exists(settings.resultsDir)) {
+        std::filesystem::create_directory(settings.resultsDir);
+    }
+
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y%m%d-%H%M%S");
+
+    outputDir = settings.resultsDir + '/' + ss.str();
+
+    std::filesystem::create_directory(outputDir);
+
+    assert(settings.snapshotDelta > 0);
 }
 
-void Simulator::setup() {
-    std::cout << "test" << "\n";
+void Simulator::snapshot(unsigned int fileNr) const {
+    if (settings.enableFileOutput) {
+        if (std::ofstream out{outputDir + '/' + settings.resultsFilenamePrefix + std::to_string(fileNr) + ".csv"};
+                out.is_open()) {
+            universe->logInternalState(out);
+        }
+        else {
+            throw std::runtime_error{"could not write to file"};
+        }
+    }
+}
+
+void Simulator::run() {
+    unsigned step = 0;
+    snapshot(0);
+
+    while (step < settings.nrOfSteps - settings.nrOfSteps % settings.snapshotDelta) {
+        universe->step(settings.snapshotDelta);
+        step += settings.snapshotDelta;
+        snapshot(step);
+    }
+    if (unsigned leftOver = settings.nrOfSteps % settings.snapshotDelta; leftOver) {
+        universe->step(leftOver);
+        snapshot(step + leftOver);
+    }
 
 }

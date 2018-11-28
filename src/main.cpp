@@ -23,17 +23,17 @@ int main() {
 
     Universe<Algorithm::bruteForce, Platform::cpuSingleThread, double> universe{settings};
 
-    universe.init(std::make_unique<SphereBodyGenerator>(settings));
-    {
-        if (!std::filesystem::exists(settings.resultsDir)) {
-            std::filesystem::create_directory(settings.resultsDir);
-        }
-        std::ofstream out{settings.resultsDir + '/' + settings.resultsFilenamePrefix + "01.txt"};
-        universe.logInternalState(out);
-    }
+//    universe.init(std::make_unique<SphereBodyGenerator>(settings));
+//    {
+//        if (!std::filesystem::exists(settings.resultsDir)) {
+//            std::filesystem::create_directory(settings.resultsDir);
+//        }
+//        std::ofstream out{settings.resultsDir + '/' + settings.resultsFilenamePrefix + "01.txt"};
+//        universe.logInternalState(out);
+//    }
 
     Simulator simulator{settings};
-    simulator.setup();
+    simulator.run();
 /*
     nlohmann::json j;
     j["pi"] = 3.14;

@@ -11,7 +11,7 @@ Settings::Settings(const nlohmann::json &json) :
         resultsFilenamePrefix{json.value("resultsFilenamePrefix", "out_")},
 
         nrOfSteps{json.value("nrOfSteps", 0u)},
-        snapshotDelta{json.value("snapshotDelta", 0u)},
+        snapshotDelta{json.value("snapshotDelta", 1u)},
         algorithm{json.value("algorithm", "brute-force")},
         platform{json.value("platform", "cpu-single-thread")},
         floatingPointType{json.value("floatingPointType", "double")},
@@ -24,9 +24,10 @@ Settings::Settings(const nlohmann::json &json) :
 
         numberOfBodies{json.value("numberOfBodies", 2u)},
 
-        universeRadius{json.value("universeRadius", fp(1))},
+        universeRadius{json.value("universeRadius", fp(1.0))},
         totalMass{1.0},
-        G{1.0} {}
+        G{1.0},
+        softeningLength{json.value("softeningLength", fp(0.0))} {}
 
 
 Settings::Settings(const std::string &settingsFilePrefix, const std::string &settingsFile) :

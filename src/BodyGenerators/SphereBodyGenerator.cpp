@@ -5,6 +5,7 @@
 #include "SphereBodyGenerator.hpp"
 #include <utility>
 #include <random>
+#include <iostream>
 
 
 SphereBodyGenerator::SphereBodyGenerator(Settings settings) : BodyGenerator{std::move(settings)} {};
@@ -21,13 +22,17 @@ std::tuple<fp, Vec3<fp>, Vec3<fp>> SphereBodyGenerator::getBody() {
 
     // Pick a random point in the sphere.
     Vec3<fp> pos{realDistribution(engine), realDistribution(engine), realDistribution(engine)};
-    while (pos.squareDistance({0, 0, 0}) > radius * radius) {
+    std::cout << "radius: " << radius <<"\n";
+    while (pos.squareDistance({0, 0, 0}) >= (radius * radius)) {
+        std::cout << "dist: " << pos.squareDistance({0,0,0}) <<"\n";
         pos.x = realDistribution(engine);
         pos.y = realDistribution(engine);
         pos.z = realDistribution(engine);
     }
+    std::cout << "-> dist: " << pos.squareDistance({0,0,0}) << ", pos: "<< pos << "\n";
 
-    Vec3<fp> vel{pos.normalize()};  // Move to infinity ("escape velocity")
+    Vec3<fp> vel{pos};  // Move to infinity ("escape velocity")
+    vel.normalize();
     // Idea: Give particles velocity so they don't (immediately) collapse into each other. With "clustering" using
     // uniform distribution, expect interesting behaviour with clusters of bodies and voids.
     // g = G * M * r / R^3              (acceleration towards center inside a solid sphere)

@@ -39,5 +39,9 @@ public:
     const fp universeRadius;  ///< Radius of the universe.
     const fp totalMass;  ///< Total mass of the system.
     const fp G;  ///< Gravitational constant.
+    /// Softening length to avoid large angle scatterings and bound particle pairs (when simulating multiple bodies as a single large body)
+    /// (From High performance computing and numerical modelling (Heidelberg University) (arXiv:1412.5187v1 [astro-ph.GA] 16 Dec 2014))
+    /// v^2 >> G*m/e
+    const fp softeningLength;
 
 };

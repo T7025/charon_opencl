@@ -1,11 +1,13 @@
 {
+  "enableFileOutput": true,
   "resultsDir": "results",
   "resultsFilenamePrefix": "out_",
-  "algorithm": "barnes-hut",
+  "algorithm": "brute-force",
   "platform": "cpu-single-thread",
-  "floatingPointType": "float",
-  "numBodies": 50,
+  "floatingPointType": "double",
+  "numberOfBodies": 50,
   "timeStep": 0.01,
-  "numIterations": 200,
-  "snapshotTime": 10
+  "snapshotDelta": 10,
+  "nrOfSteps": 500,
+  "softeningLength": 0.005
 }

@@ -14,11 +14,12 @@ class Simulator {
 public:
     explicit Simulator(Settings settings);
 
-    void setup();
-
     void run();
 
 private:
     Settings settings;
     std::unique_ptr<UniverseBase> universe;
+    std::string outputDir;
+
+    void snapshot(unsigned int fileNr) const;
 };
