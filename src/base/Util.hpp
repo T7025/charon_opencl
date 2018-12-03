@@ -18,5 +18,6 @@ enum class Algorithm {
 enum class Platform {
     cpuSingleThread,
     cpuMultiThread,
+    openCL,
 };
 

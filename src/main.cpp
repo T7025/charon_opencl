@@ -2,7 +2,8 @@
 //#include <CL/cl.hpp>
 #include <iostream>
 #include <settings/Settings.hpp>
-#include <barnes-hut/cpu-single-thread/Universe.hpp>
+//#include <brute-force/cpu-single-thread/Universe.hpp>
+#include <base/Universe.hpp>
 #include <BodyGenerators/SphereBodyGenerator.hpp>
 #include <fstream>
 #include <filesystem>
@@ -21,7 +22,7 @@ int main() {
     std::string settingsFile{"config.json"};
     Settings settings(settingsFilePrefix, settingsFile);
 
-    Universe<Algorithm::bruteForce, Platform::cpuSingleThread, double> universe{settings};
+//    Universe<Algorithm::bruteForce, Platform::cpuSingleThread, double> universe{settings};
 
 //    universe.init(std::make_unique<SphereBodyGenerator>(settings));
 //    {

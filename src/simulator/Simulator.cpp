@@ -5,7 +5,8 @@
 
 #include "Simulator.hpp"
 //#include <base/Universe.hpp>
-#include <barnes-hut/cpu-single-thread/Universe.hpp>
+#include <brute-force/cpu-single-thread/Universe.hpp>
+#include <brute-force/cpu-multi-thread/Universe.hpp>
 #include <BodyGenerators/SphereBodyGenerator.hpp>
 #include <BodyGenerators/BinaryBodyGenerator.hpp>
 #include <filesystem>
@@ -59,6 +60,7 @@ std::unique_ptr<UniverseBase> getConcreteUniverse2(const Settings &settings) {
     constexpr Entity<Platform> platformOptionsMap[] = {
             {"cpu-single-thread", Platform::cpuSingleThread},
             {"cpu-multi-thread",  Platform::cpuMultiThread},
+            {"opencl", Platform::openCL}
     };
     constexpr auto fpTypeOptions = std::make_tuple(
             FPType<double>{"double"},

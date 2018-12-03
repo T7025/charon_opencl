@@ -13,7 +13,7 @@
 
 
 template<typename FP>
-class Universe<Algorithm::bruteForce, Platform::cpuSingleThread, FP> : public UniverseBase {
+class Universe<Algorithm::bruteForce, Platform::cpuMultiThread, FP> : public UniverseBase {
 public:
     explicit Universe(Settings settings) : UniverseBase{std::move(settings)} {};
 
@@ -51,12 +51,15 @@ public:
 
 private:
     void calcNextPosition() {
+        #pragma omp parallel for
         for (unsigned i = 0; i < mass.size(); ++i) {
             position[i] += velocity[i] * settings.timeStep + acceleration[i] * settings.timeStep * settings.timeStep / 2;
         }
     }
     Vec3<FP> calcAcceleration(const unsigned int target) const {
         Vec3<FP> newAcceleration{0, 0, 0};
+        #pragma omp declare reduction(+: Vec3<FP> : omp_out += omp_in)
+        #pragma omp parallel for reduction(+:newAcceleration)
         for (unsigned j = 0; j < mass.size(); ++j) {
 //            if (target == j) continue;
             const Vec3<FP> diff = position[j] - position[target];
