@@ -14,8 +14,10 @@ add_library(
         simulator/Simulator.hpp
         base/Vec3.hpp
         base/Universe.hpp
-        barnes-hut/cpu-single-thread/Universe.cpp
-        barnes-hut/cpu-single-thread/Universe.hpp
+        brute-force/cpu-single-thread/Universe.cpp
+        brute-force/cpu-single-thread/Universe.hpp
+        brute-force/cpu-multi-thread/Universe.cpp
+        brute-force/cpu-multi-thread/Universe.hpp
         base/BodyGenerator.hpp
         BodyGenerators/SphereBodyGenerator.cpp
         BodyGenerators/SphereBodyGenerator.hpp
