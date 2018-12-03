@@ -7,8 +7,10 @@
 //#include <base/Universe.hpp>
 #include <barnes-hut/cpu-single-thread/Universe.hpp>
 #include <BodyGenerators/SphereBodyGenerator.hpp>
+#include <BodyGenerators/BinaryBodyGenerator.hpp>
 #include <filesystem>
 #include <fstream>
+#include <thread>
 
 
 // Adapted from the example at https://en.cppreference.com/w/cpp/utility/integer_sequence
@@ -114,7 +116,8 @@ std::unique_ptr<UniverseBase> getConcreteUniverse2(const Settings &settings) {
 
 Simulator::Simulator(Settings settings) : settings{std::move(settings)}, universe{getConcreteUniverse2(settings)} {
     const std::map<std::string, std::function<std::unique_ptr<BodyGenerator>()>> bodyGeneratorOptions{
-            {"sphere", [&]() { return std::make_unique<SphereBodyGenerator>(settings); }}
+            {"sphere", [&]() { return std::make_unique<SphereBodyGenerator>(settings); }},
+            {"binary", [&]() { return std::make_unique<BinaryBodyGenerator>(settings); }}
     };
 
     auto iter = bodyGeneratorOptions.find(settings.bodyGeneratorType);
@@ -133,14 +136,18 @@ Simulator::Simulator(Settings settings) : settings{std::move(settings)}, univers
 
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
-    std::stringstream ss;
-    ss << std::put_time(&tm, "%Y%m%d-%H%M%S");
 
-    outputDir = settings.resultsDir + '/' + ss.str();
+    if (settings.enableFileOutput) {
 
-    std::filesystem::create_directory(outputDir);
+        std::stringstream ss;
+        ss << std::put_time(&tm, "%Y%m%d-%H%M%S");
 
-    assert(settings.snapshotDelta > 0);
+        outputDir = settings.resultsDir + '/' + ss.str();
+
+        std::filesystem::create_directory(outputDir);
+
+        assert(settings.snapshotDelta > 0);
+    }
 }
 
 void Simulator::snapshot(unsigned int fileNr) const {
@@ -157,8 +164,27 @@ void Simulator::snapshot(unsigned int fileNr) const {
 
 void Simulator::run() {
     unsigned step = 0;
-    snapshot(0);
 
+    unsigned progressWait = 5;
+    unsigned lastStep = 0;
+
+    auto printProgress = [&]() {
+        auto secLeft = unsigned(double((settings.nrOfSteps - step) * progressWait) / (step - lastStep));
+        std::cout << double(step) * 100 / settings.nrOfSteps
+                  << "% done (" << step << "/" << settings.nrOfSteps
+                  << "). About "<< secLeft / 60 << " min " << secLeft % 60 << " sec left.\n";
+        lastStep = step;
+    };
+
+    std::thread progress{[&]() {
+        while (step < settings.nrOfSteps) {
+            printProgress();
+            std::this_thread::sleep_for(std::chrono::seconds(progressWait));
+        }
+    }};
+    progress.detach();
+
+    snapshot(0);
     while (step < settings.nrOfSteps - settings.nrOfSteps % settings.snapshotDelta) {
         universe->step(settings.snapshotDelta);
         step += settings.snapshotDelta;
@@ -169,4 +195,5 @@ void Simulator::run() {
         snapshot(step + leftOver);
     }
 
+    printProgress();
 }

@@ -58,10 +58,13 @@ private:
     Vec3<FP> calcAcceleration(const unsigned int target) const {
         Vec3<FP> newAcceleration{0, 0, 0};
         for (unsigned j = 0; j < mass.size(); ++j) {
-            if (target == j) continue;
-            const Vec3 diff = position[j] - position[target];
-            fp norm = diff.norm();
-            newAcceleration += diff * (mass[j] / (norm * norm * norm));
+//            if (target == j) continue;
+            const Vec3<FP> diff = position[j] - position[target];
+//            FP norm = diff.norm();
+//            newAcceleration += diff * (mass[j] / (norm * norm * norm));
+            FP temp = sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z + settings.softeningLength * settings.softeningLength);
+            newAcceleration += diff * (mass[j] / (temp * temp * temp));
+
         }
         return newAcceleration;
     }

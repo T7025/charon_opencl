@@ -22,14 +22,11 @@ std::tuple<fp, Vec3<fp>, Vec3<fp>> SphereBodyGenerator::getBody() {
 
     // Pick a random point in the sphere.
     Vec3<fp> pos{realDistribution(engine), realDistribution(engine), realDistribution(engine)};
-    std::cout << "radius: " << radius <<"\n";
     while (pos.squareDistance({0, 0, 0}) >= (radius * radius)) {
-        std::cout << "dist: " << pos.squareDistance({0,0,0}) <<"\n";
         pos.x = realDistribution(engine);
         pos.y = realDistribution(engine);
         pos.z = realDistribution(engine);
     }
-    std::cout << "-> dist: " << pos.squareDistance({0,0,0}) << ", pos: "<< pos << "\n";
 
     Vec3<fp> vel{pos};  // Move to infinity ("escape velocity")
     vel.normalize();
