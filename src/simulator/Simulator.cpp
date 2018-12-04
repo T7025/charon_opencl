@@ -7,6 +7,7 @@
 //#include <base/Universe.hpp>
 #include <brute-force/cpu-single-thread/Universe.hpp>
 #include <brute-force/cpu-multi-thread/Universe.hpp>
+#include <brute-force/opencl/Universe.hpp>
 #include <BodyGenerators/SphereBodyGenerator.hpp>
 #include <BodyGenerators/BinaryBodyGenerator.hpp>
 #include <filesystem>
@@ -165,21 +166,23 @@ void Simulator::snapshot(unsigned int fileNr) const {
 }
 
 void Simulator::run() {
-    unsigned step = 0;
+//    unsigned step = 0;
+    auto step = std::make_shared<unsigned>(0);
 
     unsigned progressWait = 5;
     unsigned lastStep = 0;
 
     auto printProgress = [&]() {
-        auto secLeft = unsigned(double((settings.nrOfSteps - step) * progressWait) / (step - lastStep));
-        std::cout << double(step) * 100 / settings.nrOfSteps
-                  << "% done (" << step << "/" << settings.nrOfSteps
+        auto secLeft = unsigned(double((settings.nrOfSteps - *step) * progressWait) / (*step - lastStep));
+        std::cout << double(*step) * 100 / settings.nrOfSteps
+                  << "% done (" << *step << "/" << settings.nrOfSteps
                   << "). About "<< secLeft / 60 << " min " << secLeft % 60 << " sec left.\n";
-        lastStep = step;
+        lastStep = *step;
     };
 
-    std::thread progress{[&]() {
-        while (step < settings.nrOfSteps) {
+
+    std::thread progress{[=]() {
+        while (*step < settings.nrOfSteps) {
             printProgress();
             std::this_thread::sleep_for(std::chrono::seconds(progressWait));
         }
@@ -187,15 +190,16 @@ void Simulator::run() {
     progress.detach();
 
     snapshot(0);
-    while (step < settings.nrOfSteps - settings.nrOfSteps % settings.snapshotDelta) {
+    while (*step < settings.nrOfSteps - settings.nrOfSteps % settings.snapshotDelta) {
         universe->step(settings.snapshotDelta);
-        step += settings.snapshotDelta;
-        snapshot(step);
+        *step += settings.snapshotDelta;
+        snapshot(*step);
     }
     if (unsigned leftOver = settings.nrOfSteps % settings.snapshotDelta; leftOver) {
         universe->step(leftOver);
-        snapshot(step + leftOver);
+        snapshot(*step + leftOver);
     }
 
     printProgress();
+
 }
