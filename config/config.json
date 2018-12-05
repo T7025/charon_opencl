@@ -1,13 +1,13 @@
 {
-  "enableFileOutput": true,
+  "enableFileOutput": false,
   "resultsDir": "results",
   "resultsFilenamePrefix": "out_",
   "algorithm": "brute-force",
-  "platform": "cpu-multi-thread",
+  "platform": "opencl",
   "floatingPointType": "double",
-  "numberOfBodies": 1000,
+  "numberOfBodies": 100,
   "timeStep": 0.01,
   "snapshotDelta": 10,
-  "nrOfSteps": 5000,
+  "nrOfSteps": 50,
   "softeningLength": 0.005
 }

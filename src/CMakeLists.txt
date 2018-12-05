@@ -18,6 +18,8 @@ add_library(
         brute-force/cpu-single-thread/Universe.hpp
         brute-force/cpu-multi-thread/Universe.cpp
         brute-force/cpu-multi-thread/Universe.hpp
+        brute-force/opencl/Universe.cpp
+        brute-force/opencl/Universe.hpp
         base/BodyGenerator.hpp
         BodyGenerators/SphereBodyGenerator.cpp
         BodyGenerators/SphereBodyGenerator.hpp
@@ -27,7 +29,7 @@ target_compile_features(libcharon PUBLIC cxx_std_17)
 target_compile_options(
         libcharon PUBLIC
         -Wall -Wextra
-        "$<$<CONFIG:DEBUG>:" -Og ">"
+#        "$<$<CONFIG:DEBUG>:" -Og ">"
         # -fopt-info-vec-optimized/missed/note/all
         "$<$<CONFIG:RELEASE>:" -O3 -march=native -funroll-loops -ftree-vectorize -fopt-info-vec-all=vecreport.txt ">"
 )
