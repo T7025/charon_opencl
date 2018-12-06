@@ -1,13 +1,13 @@
-dist: trusty
+dist: xenial
 
-language: python
+language: c++
 
 env: [OMP_NUM_THREADS=4]
 
 install: [
-  "pip install --upgrade cmake",
-  "cmake --version",
-  "g++ --version",
+#  "pip install --upgrade cmake",
+#  "cmake --version",
+#  "g++ --version",
 ]
 
 before_script: [
@@ -38,6 +38,10 @@ matrix:
 #    addons: {apt: {packages: [clang-6.0, libstdc++-7-dev, ocl-icd-opencl-dev, beignet],
 #                   sources: [ubuntu-toolchain-r-test, llvm-toolchain-trusty-6.0],
 #                   update: true}}
+
+  - os: osx
+    osx_image: xcode10.1
+    env: brew install gcc && CC=gcc-8 && CXX=g++-8
 
 script: [
   "cmake -DCMAKE_BUILD_TYPE=RELEASE ..",
