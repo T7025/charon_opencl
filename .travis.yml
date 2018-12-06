@@ -1,6 +1,6 @@
 dist: xenial
 
-language: c++
+language: cpp
 
 env: [OMP_NUM_THREADS=4]
 
