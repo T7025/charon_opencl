@@ -13,9 +13,33 @@
 //void SCENARIO() {
 //    GIVEN("A ")
 //}
+#include <CL/cl.hpp>
+
+/*void test() {
+    std::vector<cl::Platform> platforms;
+    cl::Platform::get(&platforms);
+
+    assert(platforms.size() > 0);
+
+    auto platform = platforms.front();
+    std::vector<cl::Device> devices;
+    platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+
+    assert(devices.size() > 0);
+
+    auto device = devices.front();
+    auto vendor = device.getInfo<CL_DEVICE_VENDOR>();
+    auto version = device.getInfo<CL_DEVICE_VERSION>();
+
+    device = devices[1];
+
+
+}*/
 
 int main() {
 //    std::ios_base::sync_with_stdio(false);
+
+//    test();
 
     std::string settingsFilePrefix{"config"};
     settingsFilePrefix += '/';

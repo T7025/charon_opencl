@@ -10,16 +10,21 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
-#include <CL/cl.hpp>
+#include <CL/cl2.hpp>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
 
 
+template <typename FP> struct CLVectorGet {};
+template <> struct CLVectorGet<double>{ typedef cl_double3 value_type; };
+template <> struct CLVectorGet<float>{ typedef cl_float3 value_type; };
+
 template <typename FP>
 class Universe<Algorithm::bruteForce, Platform::openCL, FP> : public UniverseBase {
 public:
-    explicit Universe(Settings settings) : UniverseBase{std::move(settings)} {};
+
+    explicit Universe(Settings settings);// : UniverseBase{std::move(settings)} {};
 
     void init(std::unique_ptr<BodyGenerator> bodyGenerator) override;
 
@@ -70,16 +75,27 @@ private:
 
     cl::Platform platform;
     cl::Device device;
-    cl::Context context;
+    std::unique_ptr<cl::Context> context;
     cl::Program::Sources sources;
     cl::Program program;
-
+    std::unique_ptr<cl::CommandQueue> queue;
 
     std::vector<FP> mass;
-    std::vector<Vec3<FP>> position;
-    std::vector<Vec3<FP>> velocity;
-    std::vector<Vec3<FP>> acceleration;
+    typedef typename CLVectorGet<FP>::value_type cl_fp3;
+    std::vector<cl_fp3> position;
+    std::vector<cl_fp3> velocity;
+    std::vector<cl_fp3> acceleration;
+
+    std::unique_ptr<cl::Buffer> massBuffer;
+    std::unique_ptr<cl::Buffer> positionBuffer;
+    std::unique_ptr<cl::Buffer> velocityBuffer;
+    std::unique_ptr<cl::Buffer> accelerationBuffer;
 };
+
+template <typename FP>
+Universe<Algorithm::bruteForce, Platform::openCL, FP>::Universe(Settings settings) : UniverseBase{std::move(settings)} {
+
+}
 
 
 template <typename FP>
@@ -105,6 +121,7 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
             break;
         }
     }
+
     if (allDevices.empty()) {
         throw std::runtime_error{"No openCL devices found."};
     }
@@ -113,7 +130,8 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
     std::cout << "Using platform: " << platform.getInfo<CL_PLATFORM_NAME>() << "\n";
     std::cout << "Using device: " << device.getInfo<CL_DEVICE_NAME>() << "\n";
 
-    context = cl::Context{device};
+    context = std::make_unique<cl::Context>(device);
+
 
     std::filesystem::path kernelFileName{__FILE__};
     kernelFileName.replace_filename("UniverseKernel.cl");
@@ -123,61 +141,80 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
         const std::string &str = ss.str();
         std::cout << "\n" << str << "\n";
         sources.emplace_back(str.c_str(), str.size());
-    } else {
+    }
+    else {
         throw std::runtime_error{"Could not read kernel in file " + kernelFileName.string()};
     }
 
-    program = cl::Program{context, sources};
+    program = cl::Program{*context, sources};
     std::cout << "Building kernels...\n";
-    if (program.build({device}) != CL_SUCCESS) {
-        std::cout<<" Error building: "<<program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)<<"\n";
-        throw std::runtime_error{" Error building: " + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)};
+    try {
+        program.build({device});
     }
-    std::cout<<"Kernel build log: "<<program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)<<"\n";
+    catch (cl::BuildError &e) {
+        std::cout << " Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device) << "\n";
+        std::cout << e.getBuildLog().size() << "\n";
+    }
 
+    queue = std::make_unique<cl::CommandQueue>(*context, device);
+/*
     //------------------ Below is experimental
 
 
-    cl::Buffer buffer_A(context,CL_MEM_READ_WRITE,sizeof(int)*10);
-    cl::Buffer buffer_B(context,CL_MEM_READ_WRITE,sizeof(int)*10);
-    cl::Buffer buffer_C(context,CL_MEM_READ_WRITE,sizeof(int)*10);
+    cl::Buffer buffer_A(*context, CL_MEM_READ_WRITE, sizeof(int) * 10);
+    cl::Buffer buffer_B(*context, CL_MEM_READ_WRITE, sizeof(int) * 10);
+    cl::Buffer buffer_C(*context, CL_MEM_READ_WRITE, sizeof(int) * 10);
 
     int A[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     int B[] = {0, 1, 2, 0, 1, 2, 0, 1, 2, 0};
 
-    cl::CommandQueue queue(context, device);
+    cl::CommandQueue queue(*context, device);
 
-    queue.enqueueWriteBuffer(buffer_A,CL_TRUE,0,sizeof(int)*10,A);
-    queue.enqueueWriteBuffer(buffer_B,CL_TRUE,0,sizeof(int)*10,B);
+    queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(int) * 10, A);
+    queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * 10, B);
 
     //run the kernel
 //    cl::KernelFunctor simple_add(cl::Kernel(program,"simple_add"),queue,cl::NullRange,cl::NDRange(10),cl::NullRange);
 //    simple_add(buffer_A,buffer_B,buffer_C);
-    auto simple_add = cl::make_kernel<cl::Buffer&, cl::Buffer&, cl::Buffer&>(program, "simple_add");
-    cl::EnqueueArgs eargs(queue,cl::NullRange,cl::NDRange(10),cl::NullRange);
-    simple_add(eargs, buffer_A,buffer_B,buffer_C).wait();
+
+//    auto simple_add = cl::make_kernel<cl::Buffer&, cl::Buffer&, cl::Buffer&>(program, "simple_add");
+//    cl::EnqueueArgs eargs(queue,cl::NullRange,cl::NDRange(10),cl::NullRange);
+//    simple_add(eargs, buffer_A,buffer_B,buffer_C).wait();
 
     //alternative way to run the kernel
-    /*
-    cl::Kernel kernel_add=cl::Kernel(program,"simple_add");
-    kernel_add.setArg(0,buffer_A);
-    kernel_add.setArg(1,buffer_B);
-    kernel_add.setArg(2,buffer_C);
-    queue.enqueueNDRangeKernel(kernel_add,cl::NullRange,cl::NDRange(10),cl::NullRange);
-    queue.finish();
-    //*/
+    //
+//    cl::Kernel kernel_add=cl::Kernel(program,"simple_add");
+//    kernel_add.setArg(0,buffer_A);
+//    kernel_add.setArg(1,buffer_B);
+//    kernel_add.setArg(2,buffer_C);
+//    queue.enqueueNDRangeKernel(kernel_add,cl::NullRange,cl::NDRange(10),cl::NullRange);
+//    queue.finish();
+    //
+
+//    auto kernel = cl::make_kernel<cl::Buffer&, cl::Buffer&, cl::Buffer&>(program, "simple_add");
+//    cl::EnqueueArgs eArgs(queue, cl::NullRange, cl::NDRange(10), cl::NullRange);
+//    kernel(eArgs, buffer_A, buffer_B, buffer_C);
+
+    cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer> simple_add(program, "simple_add");
+    cl::EnqueueArgs eArgs(queue, cl::NullRange, cl::NDRange(10), cl::NullRange);
+    simple_add(eArgs, buffer_A, buffer_B, buffer_C);
+
 
     int C[10];
     //read result C from the device to array C
-    queue.enqueueReadBuffer(buffer_C,CL_TRUE,0,sizeof(int)*10,C);
+    queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int) * 10, C);
 
 
     queue.finish();
 
-    std::cout<<" result: \n";
-    for(int i=0;i<10;i++){
-        std::cout<<C[i]<<" ";
+    std::cout << " result: \n";
+    for (int i = 0; i < 10; i++) {
+        std::cout << C[i] << " ";
     }
+    //*/
+
+    std::cout << "\n";
+    std::cout << "Double supported?: " << (CL_DEVICE_DOUBLE_FP_CONFIG > 0) << "\n";
 
     for (unsigned i = 0; i < settings.numberOfBodies; ++i) {
         auto[m, pos, vel] = bodyGenerator->getBody();
@@ -187,4 +224,41 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
         acceleration.emplace_back(0, 0, 0);
     }
 
+    massBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                                              sizeof(FP) * mass.size(), mass.data());
+    positionBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+                                                  sizeof(FP) * position.size() * 4, position.data());
+    velocityBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+                                                  sizeof(FP) * velocity.size() * 4, velocity.data());
+    accelerationBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+                                                      sizeof(FP) * acceleration.size() * 4, acceleration.data());
+//    massBuffer = std::make_unique<cl::Buffer>(mass.begin(), mass.end(), true);  // 3d argument: read only?
+//    positionBuffer = std::make_unique<cl::Buffer>(position.begin(), position.end(), false);
+//    velocityBuffer = std::make_unique<cl::Buffer>(velocity.begin(), velocity.end(), false);
+//    accelerationBuffer = std::make_unique<cl::Buffer>(acceleration.begin(), acceleration.end(), false);
+
+    std::cout << "Size of mass values: " << massBuffer->getInfo<CL_MEM_SIZE>() << " bytes\n";
+
+    queue->enqueueWriteBuffer(*massBuffer, CL_TRUE, 0, sizeof(FP) * mass.size(), mass.data());
+
+    /*
+    std::vector<typename CLVectorGet<FP>::value_type> t;
+
+
+    if constexpr(sizeof(FP) == sizeof(double)) {
+        std::vector<cl_double3> tempPos;
+        for (const auto &p : position) {
+            tempPos.emplace_back(cl_double3{p.x, p.y, p.z});
+        }
+        queue->enqueueWriteBuffer(*positionBuffer, CL_TRUE, 0, sizeof(cl_double3) * tempPos.size(), tempPos.data());
+
+    }
+    else if constexpr(sizeof(FP) == sizeof(float)) {
+        std::vector<cl_float3> tempPos;
+        for (const auto &p : position) {
+            tempPos.emplace_back(cl_float3{p.x, p.y, p.z});
+        }
+        queue->enqueueWriteBuffer(*positionBuffer, CL_TRUE, 0, sizeof(cl_float3) * tempPos.size(), tempPos.data());
+    }
+*/
 }

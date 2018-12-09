@@ -36,7 +36,8 @@ target_compile_options(
 
 target_compile_definitions(
         libcharon PUBLIC
-        CL_HPP_MINIMUM_OPENCL_VERSION=200  # Minimum OpenCL version: 2.0.0
+        CL_HPP_MINIMUM_OPENCL_VERSION=120  # Minimum OpenCL version: 1.2.0
+        CL_HPP_TARGET_OPENCL_VERSION=120  # Target OpenCL version
         CL_HPP_ENABLE_EXCEPTIONS  # Enables exceptions for use in the C++ bindings header.
         $<$<BOOL:CHARON_USE_DOUBLE>: CHARON_USE_DOUBLE >
 )
