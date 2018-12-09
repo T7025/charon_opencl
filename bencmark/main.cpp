@@ -3,6 +3,8 @@
 //
 #include <vector>
 #include <iostream>
+#include <deque>
+#include <nlohmann/json.hpp>
 
 template <typename FP>
 std::vector<unsigned> getInterestingNumberOfBodies() {
@@ -42,6 +44,43 @@ std::vector<unsigned> getInterestingNumberOfBodies() {
     // 30720    31457280    786432     393216
     // Assumes that the Universe/Vector/... classes are 0 bytes.
 
+
+
+}
+
+std::vector<nlohmann::json> getSettings() {
+
+    std::vector<nlohmann::json> settings{nlohmann::json{}};
+
+    auto addSettings = [&settings](const std::string &name, auto ...values) {
+        auto addSettingsImpl = [&settings](auto &self, size_t size, const std::string &name, auto &&value,
+                                           auto &&...values) {
+            if constexpr(sizeof...(values) > 0) {
+                self(self, size, name, values...);
+            }
+            for (unsigned i = 0; i < size; ++i) {
+                auto tempSettings = settings[i];
+                tempSettings[name] = value;
+                settings[i + size * sizeof...(values)] = tempSettings;
+            }
+        };
+        const auto size = settings.size();
+        settings.resize(settings.size() * sizeof...(values));
+        addSettingsImpl(addSettingsImpl, size, name, values...);
+    };
+
+    addSettings("algorithm", "brute-force", "barnes-hut");
+    addSettings("floatingPointType", "float", "double");
+    addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
+    addSettings("barnesHutCutoff", 0.7);
+    addSettings("numberOfBodies", 200, 400, 800, 1600);
+
+
+    for (const auto &s : settings) {
+        std::cout << s << "\n";
+    }
+
+    return settings;
 }
 
 int main() {
@@ -52,4 +91,8 @@ int main() {
     // Important metrics: num bodies, run time for each algorithm, device, FP
     std::cout << "vector of floats: " << sizeof(std::vector<float>{}) << " bytes\n";
     std::cout << "vector of doubles: " << sizeof(std::vector<double>{}) << " bytes\n";
+
+    auto i = system("ls");
+//    std::cout << i << "\n";
+    getSettings();
 }
