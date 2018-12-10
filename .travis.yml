@@ -34,7 +34,8 @@ matrix:
     addons:
       apt:
         sources: [ubuntu-toolchain-r-test]
-        packages: [g++-8, ocl-icd-opencl-dev, beignet-dev,]
+#        packages: [g++-8, ocl-icd-opencl-dev, beignet-dev,]
+        packages: [g++-8, opencl-icd, ocl-icd-libopencl1]
         update: true
 
 #  - os: linux  # TODO: fix compiling with clang
