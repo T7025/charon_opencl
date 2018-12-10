@@ -31,9 +31,11 @@ matrix:
 
   - os: linux
     env: CXX='g++-8'
-    addons: {apt: {packages: [g++-8, ocl-icd-opencl-dev, pocl],
-                   sources: [ubuntu-toolchain-r-test],
-                   update: true}}
+    addons:
+      apt:
+        sources: [ubuntu-toolchain-r-test]
+        packages: [g++-8, ocl-icd-opencl-dev, beignet-dev,]
+        update: true
 
 #  - os: linux  # TODO: fix compiling with clang
 #    env: CXX='clang++-6.0'
