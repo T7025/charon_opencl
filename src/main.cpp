@@ -13,7 +13,7 @@
 //void SCENARIO() {
 //    GIVEN("A ")
 //}
-#include <CL/cl.hpp>
+//#include <CL/cl.hpp>
 
 /*void test() {
     std::vector<cl::Platform> platforms;
