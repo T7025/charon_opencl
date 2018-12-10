@@ -12,7 +12,9 @@ install: [
   "cmake --version",
   "g++ --version",
 
-  "cd /usr/include/CL",
+  "cd /usr/include/",
+  "ls -A",
+  "cd /usr/include/CL/",
   "ls -A",
 ]
 
@@ -38,8 +40,8 @@ matrix:
     addons:
       apt:
         sources: [ubuntu-toolchain-r-test]
-#        packages: [g++-8, ocl-icd-opencl-dev, beignet-dev,]
-        packages: [g++-8, ocl-icd-libopencl1]
+        packages: [g++-8, ocl-icd-opencl-dev, beignet-dev,]
+#        packages: [g++-8, ocl-icd-libopencl1]
 #        update: true
 
 #  - os: linux  # TODO: fix compiling with clang
