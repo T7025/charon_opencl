@@ -12,10 +12,8 @@ install: [
   "cmake --version",
   "g++ --version",
 
-  "cd /usr/include/",
-  "ls -A",
-  "cd /usr/include/CL/",
-  "ls -A",
+#  "cd /usr/include/CL/",
+#  "ls -A",
 ]
 
 before_script: [

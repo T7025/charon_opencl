@@ -38,7 +38,7 @@ public:
     }
 
     void step(unsigned int numSteps) override {
-        for (unsigned step = 1; step < numSteps; ++step) {
+        for (unsigned step = 0; step < numSteps; ++step) {
             calcNextPosition();
             for (unsigned i = 0; i < mass.size(); ++i) {
                 auto newAcceleration = calcAcceleration(i);

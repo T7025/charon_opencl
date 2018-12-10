@@ -16,13 +16,33 @@
 #include <filesystem>
 
 
-template <typename FP> struct CLVectorGet {};
-template <> struct CLVectorGet<double>{ typedef cl_double3 value_type; };
-template <> struct CLVectorGet<float>{ typedef cl_float3 value_type; };
+template <typename FP> struct CLFloatTypeGet {};
+template <> struct CLFloatTypeGet<double>{
+    typedef cl_double value_type;
+    typedef cl_double3 value_type3;
+    static constexpr const char *kernelSuffix = "Double";
+};
+template <> struct CLFloatTypeGet<float>{
+    typedef cl_float value_type;
+    typedef cl_float3 value_type3;
+    static constexpr const char *kernelSuffix = "Float";
+};
+
+std::ostream &operator<<(std::ostream &out, const cl_double3 &val) {
+    out << val.x << ',' << val.y << ',' << val.z;
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const cl_float3 &val) {
+    out << val.x << ',' << val.y << ',' << val.z;
+    return out;
+}
 
 template <typename FP>
 class Universe<Algorithm::bruteForce, Platform::openCL, FP> : public UniverseBase {
 public:
+    typedef typename CLFloatTypeGet<FP>::value_type3 cl_fp3;
+    typedef typename CLFloatTypeGet<FP>::value_type cl_fp;
 
     explicit Universe(Settings settings);// : UniverseBase{std::move(settings)} {};
 
@@ -39,19 +59,25 @@ public:
     }
 
     void step(unsigned int numSteps) override {
-        for (unsigned step = 1; step < numSteps; ++step) {
-            calcNextPosition();
+        for (unsigned step = 0; step < numSteps; ++step) {
+//            calcNextPosition();
+            cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl_fp> calcNextPosition(program, std::string{"calcNextPosition"} + CLFloatTypeGet<FP>::kernelSuffix);
+            cl::EnqueueArgs eArgs(*queue, cl::NullRange, cl::NDRange(mass.size()), cl::NullRange);
+            calcNextPosition(eArgs, *positionBuffer, *velocityBuffer, *accelerationBuffer, settings.timeStep);
+
+//            clGetKernelWorkGroupInfo()
+
             for (unsigned i = 0; i < mass.size(); ++i) {
-                auto newAcceleration = calcAcceleration(i);
-                velocity[i] += newAcceleration * settings.timeStep;
-                acceleration[i] = newAcceleration;
+//                auto newAcceleration = calcAcceleration(i);
+//                velocity[i] += newAcceleration * settings.timeStep;
+//                acceleration[i] = newAcceleration;
             }
         }
     }
 
 
 private:
-    void calcNextPosition() {
+    /*void calcNextPosition() {
         for (unsigned i = 0; i < mass.size(); ++i) {
             position[i] +=
                     velocity[i] * settings.timeStep + acceleration[i] * settings.timeStep * settings.timeStep / 2;
@@ -71,7 +97,7 @@ private:
 
         }
         return newAcceleration;
-    }
+    }*/
 
     cl::Platform platform;
     cl::Device device;
@@ -81,7 +107,6 @@ private:
     std::unique_ptr<cl::CommandQueue> queue;
 
     std::vector<FP> mass;
-    typedef typename CLVectorGet<FP>::value_type cl_fp3;
     std::vector<cl_fp3> position;
     std::vector<cl_fp3> velocity;
     std::vector<cl_fp3> acceleration;
@@ -213,15 +238,17 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
     }
     //*/
 
+
+
     std::cout << "\n";
     std::cout << "Double supported?: " << (CL_DEVICE_DOUBLE_FP_CONFIG > 0) << "\n";
 
     for (unsigned i = 0; i < settings.numberOfBodies; ++i) {
         auto[m, pos, vel] = bodyGenerator->getBody();
-        mass.emplace_back(m);
-        position.emplace_back(pos);
-        velocity.emplace_back(vel);
-        acceleration.emplace_back(0, 0, 0);
+        mass.emplace_back(cl_fp(m));
+        position.emplace_back(cl_fp3{cl_fp(pos.x), cl_fp(pos.y), cl_fp(pos.z)});
+        velocity.emplace_back(cl_fp3{cl_fp(vel.x), cl_fp(vel.y), cl_fp(vel.z)});
+        acceleration.emplace_back(cl_fp3{0, 0, 0});
     }
 
     massBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
@@ -242,7 +269,7 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
     queue->enqueueWriteBuffer(*massBuffer, CL_TRUE, 0, sizeof(FP) * mass.size(), mass.data());
 
     /*
-    std::vector<typename CLVectorGet<FP>::value_type> t;
+    std::vector<typename CLFloatTypeGet<FP>::value_type> t;
 
 
     if constexpr(sizeof(FP) == sizeof(double)) {
