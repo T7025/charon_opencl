@@ -2,6 +2,7 @@
 #
 #language: cpp
 dist: trusty
+sudo: true
 language: python
 
 env: [OMP_NUM_THREADS=4]
@@ -10,6 +11,9 @@ install: [
   "pip install --upgrade cmake",
   "cmake --version",
   "g++ --version",
+
+  "cd /usr/include/CL",
+  "ls -A",
 ]
 
 before_script: [
@@ -36,7 +40,7 @@ matrix:
         sources: [ubuntu-toolchain-r-test]
 #        packages: [g++-8, ocl-icd-opencl-dev, beignet-dev,]
         packages: [g++-8, opencl-icd, ocl-icd-libopencl1]
-        update: true
+#        update: true
 
 #  - os: linux  # TODO: fix compiling with clang
 #    env: CXX='clang++-6.0'
