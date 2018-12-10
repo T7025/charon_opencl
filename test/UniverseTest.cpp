@@ -42,7 +42,7 @@ SCENARIO("Test the position update function", "[universe]") {
 //        addSettings("numberOfBodies", 1);
 //        addSettings("bodyGeneratorType", )
 
-        Universe()
+//        Universe()
 
 
 
