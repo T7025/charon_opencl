@@ -6,6 +6,8 @@
 #include <nlohmann/json.hpp>
 #include <settings/Settings.hpp>
 #include <base/BodyGenerator.hpp>
+#include <base/Universe.hpp>
+#include <base/UniverseBuilder.hpp>
 
 class SingleBodyGenerator : public BodyGenerator {
 public:
@@ -43,6 +45,10 @@ SCENARIO("Test the position update function", "[universe]") {
 //        addSettings("bodyGeneratorType", )
 
 //        Universe()
+        for (const auto &s : settings) {
+            auto universe = UniverseBuilder{}(Settings{s});
+
+        }
 
 
 
