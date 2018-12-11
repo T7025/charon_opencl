@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include "Universe.hpp"
+#include "Exceptions.hpp"
 
 // Adapted from the example at https://en.cppreference.com/w/cpp/utility/integer_sequence
 template <class Ch, class Tr, class Tuple, std::size_t... Is>
@@ -96,12 +97,7 @@ std::unique_ptr<UniverseBase> getConcreteUniverse(const Settings &settings) {
                                       platformOptionsMap[platformIndex].value,
                                       typename std::tuple_element<fpIndex, decltype(fpTypeOptions)>::type::value_type>;
         if constexpr(std::is_abstract<UniverseType>::value) {
-            throw std::runtime_error{
-                    "The Universe with options:\n"
-                    "\talgorithm = '" + settings.algorithm + "',\n" +
-                    "\tplatform = '" + settings.platform + "',\n" +
-                    "\tfloatingPointType = '" + settings.floatingPointType + "'\n" +
-                    "is not implemented."};
+            throw NotImplementedUniverseException(settings);
         }
         else {
             return std::make_unique<UniverseType>(settings);

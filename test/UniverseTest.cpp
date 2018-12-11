@@ -8,6 +8,7 @@
 #include <base/BodyGenerator.hpp>
 #include <base/Universe.hpp>
 #include <base/UniverseBuilder.hpp>
+#include <base/Exceptions.hpp>
 
 class SingleBodyGenerator : public BodyGenerator {
 public:
@@ -46,7 +47,15 @@ SCENARIO("Test the position update function", "[universe]") {
 
 //        Universe()
         for (const auto &s : settings) {
-            auto universe = UniverseBuilder{}(Settings{s});
+            std::unique_ptr<UniverseBase> universe;
+            try {
+                universe = UniverseBuilder{}(Settings{s});
+            }
+            catch (NotImplementedUniverseException &e) {}
+
+            universe->init(std::make_unique<SingleBodyGenerator>(settings));
+
+
 
         }
 
