@@ -42,7 +42,7 @@ SCENARIO("Test the position update function", "[universe]") {
 
         addSettings("algorithm", "brute-force", "barnes-hut");
         addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
-//        addSettings("numberOfBodies", 1);
+        addSettings("numberOfBodies", 1);
 //        addSettings("bodyGeneratorType", )
 
         for (const auto &s : settings) {

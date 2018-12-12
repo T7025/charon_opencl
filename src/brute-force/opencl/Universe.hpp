@@ -125,8 +125,8 @@ Universe<Algorithm::bruteForce, Platform::openCL, FP>::Universe(Settings setting
 
 template <typename FP>
 void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr<BodyGenerator> bodyGenerator) {
-//    const auto clDeviceType = CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_CPU;
-    const auto clDeviceType = CL_DEVICE_TYPE_GPU;
+    const auto clDeviceType = CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_CPU;
+//    const auto clDeviceType = CL_DEVICE_TYPE_GPU;
 
     // Pick an OpenCL platform that contains the requested device type.
     // Then pick the first available device of the requested type.
@@ -251,11 +251,11 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
         acceleration.emplace_back(cl_fp3{0, 0, 0});
     }
 
-    massBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+    massBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_ONLY | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                                               sizeof(FP) * mass.size(), mass.data());
-    positionBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+    positionBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                                                   sizeof(FP) * position.size() * 4, position.data());
-    velocityBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+    velocityBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                                                   sizeof(FP) * velocity.size() * 4, velocity.data());
     accelerationBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
                                                       sizeof(FP) * acceleration.size() * 4, acceleration.data());
