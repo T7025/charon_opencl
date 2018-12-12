@@ -31,9 +31,9 @@ public:
     void logInternalState(std::ostream &out) override {
         assert(mass.size() == position.size() && mass.size() == velocity.size() && mass.size() == acceleration.size());
 
-        out << "mass,xPos,yPos,zPos,xVel,yVel,zVel,xAcc,yAcc,zAcc\n";
+        out << "mass xPos yPos zPos xVel yVel zVel xAcc yAcc zAcc\n";
         for (unsigned i = 0; i < mass.size(); ++i) {
-            out << mass[i] << ',' << position[i] << ',' << velocity[i] << ',' << acceleration[i] << '\n';
+            out << mass[i] << ' ' << position[i] << ' ' << velocity[i] << ' ' << acceleration[i] << '\n';
         }
     }
 
