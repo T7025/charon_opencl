@@ -29,3 +29,10 @@ public:
                             "is not implemented."} {}
 };
 
+class InvalidOptionValue : public CharonException {
+public:
+    InvalidOptionValue(const std::string &optionName, const std::string &optionValue,
+                       const std::string &expectedOptions) :
+            CharonException{"Option '" + optionName + "' has invalid value '" + optionValue +
+                            "'. Expected one of " + expectedOptions + "."} {}
+};

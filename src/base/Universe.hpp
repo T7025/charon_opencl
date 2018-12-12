@@ -13,7 +13,6 @@
 #include "BodyGenerator.hpp"
 
 
-//template<enum Algorithm, enum Platform>
 class UniverseBase {
 public:
     explicit UniverseBase(Settings settings) : settings{std::move(settings)} {};

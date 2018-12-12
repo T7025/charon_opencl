@@ -2,10 +2,11 @@
 // Created by thomas on 12/11/18.
 //
 
-#include "UniverseBuilder.hpp"
 
 #include <sstream>
 #include "Universe.hpp"
+#include "getConcreteUniverse.hpp"
+#include "ConcreteUniverseInclude.hpp"
 #include "Exceptions.hpp"
 
 // Adapted from the example at https://en.cppreference.com/w/cpp/utility/integer_sequence
@@ -20,14 +21,14 @@ auto &operator<<(std::basic_ostream<Ch, Tr> &os, const std::tuple<Args...> &t) {
     return os;
 }
 
-
+/*
 std::string createErrorString(const std::string &optionName, const std::string &optionValue,
                               const std::string &expectedOptions) {
     std::stringstream ss;
     ss << "Option '" << optionName << "' has invalid value '" << optionValue
        << "'. Expected one of " << expectedOptions << ".";
     return ss.str();
-}
+}*/
 
 template <typename T> struct Entity { const char *name; const T value; };
 template <typename FP> struct FPType { const char *name; typedef FP value_type; };
@@ -45,7 +46,7 @@ auto &operator<<(std::ostream &os, const FPType<FP> &fpType) {
 }
 
 template <int algorithmIndex = 0, int platformIndex = 0, int fpIndex = 0>
-std::unique_ptr<UniverseBase> getConcreteUniverse(const Settings &settings) {
+std::unique_ptr<UniverseBase> getConcreteUniverseImpl(const Settings &settings) {
     // Edit option values here:
     constexpr Entity<Algorithm> algorithmOptionsMap[] = {
             {"brute-force", Algorithm::bruteForce},
@@ -69,28 +70,28 @@ std::unique_ptr<UniverseBase> getConcreteUniverse(const Settings &settings) {
         for (int i = 0; i < numAlgorithms; ++i) {
             ss << (i == 0 ? "" : ",") << algorithmOptionsMap[i];
         }
-        throw std::runtime_error{createErrorString("algorithm", settings.algorithm, ss.str())};
+        throw InvalidOptionValue{"algorithm", settings.algorithm, ss.str()};
     }
     else if constexpr (numPlatforms == platformIndex) {
         std::stringstream ss;
         for (int i = 0; i < numPlatforms; ++i) {
             ss << (i == 0 ? "" : ",") << platformOptionsMap[i];
         }
-        throw std::runtime_error{createErrorString("platform", settings.platform, ss.str())};
+        throw InvalidOptionValue{"platform", settings.platform, ss.str()};
     }
     else if constexpr (std::tuple_size<decltype(fpTypeOptions)>::value == fpIndex) {
         std::stringstream ss;
         ss << fpTypeOptions;
-        throw std::runtime_error{createErrorString("floatingPointType", settings.floatingPointType, ss.str())};
+        throw InvalidOptionValue{"floatingPointType", settings.floatingPointType, ss.str()};
     }
     else if (settings.algorithm != algorithmOptionsMap[algorithmIndex].name) {
-        return getConcreteUniverse<algorithmIndex + 1, platformIndex, fpIndex>(settings);
+        return getConcreteUniverseImpl<algorithmIndex + 1, platformIndex, fpIndex>(settings);
     }
     else if (settings.platform != platformOptionsMap[platformIndex].name) {
-        return getConcreteUniverse<algorithmIndex, platformIndex + 1, fpIndex>(settings);
+        return getConcreteUniverseImpl<algorithmIndex, platformIndex + 1, fpIndex>(settings);
     }
     else if (settings.floatingPointType != std::get<fpIndex>(fpTypeOptions).name) {
-        return getConcreteUniverse<algorithmIndex, platformIndex, fpIndex + 1>(settings);
+        return getConcreteUniverseImpl<algorithmIndex, platformIndex, fpIndex + 1>(settings);
     }
     else {
         using UniverseType = Universe<algorithmOptionsMap[algorithmIndex].value,
@@ -105,6 +106,6 @@ std::unique_ptr<UniverseBase> getConcreteUniverse(const Settings &settings) {
     }
 }
 
-std::unique_ptr<UniverseBase> UniverseBuilder::operator()(const Settings &settings) {
-    return getConcreteUniverse(settings);
+std::unique_ptr<UniverseBase> getConcreteUniverse(const Settings &settings) {
+    return getConcreteUniverseImpl(settings);
 }

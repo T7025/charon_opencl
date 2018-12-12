@@ -7,7 +7,7 @@
 #include <settings/Settings.hpp>
 #include <base/BodyGenerator.hpp>
 #include <base/Universe.hpp>
-#include <base/UniverseBuilder.hpp>
+#include <base/getConcreteUniverse.hpp>
 #include <base/Exceptions.hpp>
 
 class SingleBodyGenerator : public BodyGenerator {
@@ -45,13 +45,15 @@ SCENARIO("Test the position update function", "[universe]") {
 //        addSettings("numberOfBodies", 1);
 //        addSettings("bodyGeneratorType", )
 
-//        Universe()
         for (const auto &s : settings) {
+            Settings settings{s};
             std::unique_ptr<UniverseBase> universe;
             try {
-                universe = UniverseBuilder{}(Settings{s});
+                universe = getConcreteUniverse(Settings{s});
             }
-            catch (NotImplementedUniverseException &e) {}
+            catch (NotImplementedUniverseException &e) {
+                continue;
+            }
 
             universe->init(std::make_unique<SingleBodyGenerator>(settings));
 

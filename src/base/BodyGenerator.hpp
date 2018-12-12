@@ -1,11 +1,10 @@
-#include <utility>
-
 //
 // Created by thomas on 11/23/18.
 //
 
 #pragma once
 
+#include <utility>
 
 //template <typename FP>
 //struct Vec3 {

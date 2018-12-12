@@ -10,6 +10,4 @@
 
 class UniverseBase;
 
-struct UniverseBuilder {
-    std::unique_ptr<UniverseBase> operator()(const Settings &settings);
-};
+std::unique_ptr<UniverseBase> getConcreteUniverse(const Settings &settings);

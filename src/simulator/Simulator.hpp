@@ -7,8 +7,7 @@
 
 #include <memory>
 #include <settings/Settings.hpp>
-
-class UniverseBase;
+#include <base/Universe.hpp>
 
 class Simulator {
 public:
