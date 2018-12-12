@@ -266,7 +266,7 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
 
     std::cout << "Size of mass values: " << massBuffer->getInfo<CL_MEM_SIZE>() << " bytes\n";
 
-    queue->enqueueWriteBuffer(*massBuffer, CL_TRUE, 0, sizeof(FP) * mass.size(), mass.data());
+//    queue->enqueueWriteBuffer(*massBuffer, CL_TRUE, 0, sizeof(FP) * mass.size(), mass.data());
 
     /*
     std::vector<typename CLFloatTypeGet<FP>::value_type> t;
