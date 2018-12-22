@@ -38,11 +38,22 @@ public:
     }
 
     void step(unsigned int numSteps) override {
+        if (!doneFirstStep) {
+            calcNextPosition();
+            for (unsigned i = 0; i < mass.size(); ++i) {
+                Vec3<FP> newAcceleration = calcAcceleration(i);
+                velocity[i] += newAcceleration * settings.timeStep;
+                acceleration[i] = newAcceleration;
+            }
+            doneFirstStep = true;
+            numSteps--;
+        }
+
         for (unsigned step = 0; step < numSteps; ++step) {
             calcNextPosition();
             for (unsigned i = 0; i < mass.size(); ++i) {
                 auto newAcceleration = calcAcceleration(i);
-                velocity[i] += newAcceleration * settings.timeStep;
+                velocity[i] += (acceleration[i] + newAcceleration) * settings.timeStep / 2.0;
                 acceleration[i] = newAcceleration;
             }
         }

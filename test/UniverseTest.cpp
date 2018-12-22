@@ -9,6 +9,8 @@
 #include <base/Universe.hpp>
 #include <base/getConcreteUniverse.hpp>
 #include <base/Exceptions.hpp>
+#include <iostream>
+#include <BodyGenerators/BinaryBodyGenerator.hpp>
 
 class SingleBodyGenerator : public BodyGenerator {
 public:
@@ -18,6 +20,8 @@ public:
         return {1, {0, 0, 0}, {1, 1, 1}};
     }
 };
+
+
 
 SCENARIO("Test the position update function", "[universe]") {
     GIVEN("For every possible universe configuration") {
@@ -41,26 +45,63 @@ SCENARIO("Test the position update function", "[universe]") {
         };
 
         addSettings("algorithm", "brute-force", "barnes-hut");
-        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
-        addSettings("numberOfBodies", 1);
-//        addSettings("bodyGeneratorType", )
+        addSettings("platform", "cpu-single-thread", "cpu-multi-thread");
+//        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
+//        addSettings("platform", "cpu-single-thread");
+        addSettings("floatingPointType", "float", "double");
+        addSettings("rngSeed", 1302);
 
-        for (const auto &s : settings) {
-            Settings settings{s};
-            std::unique_ptr<UniverseBase> universe;
-            try {
-                universe = getConcreteUniverse(Settings{s});
+        WHEN("Computing the evolution of a trivial single body system") {
+            addSettings("numberOfBodies", 1);
+            addSettings("timeStep", 1);
+            for (const auto &s : settings) {
+                Settings settings{s};
+                std::unique_ptr<UniverseBase> universe;
+                try {
+                    universe = getConcreteUniverse(Settings{s});
+                }
+                catch (NotImplementedUniverseException &e) {
+                    continue;
+                }
+                universe->init(std::make_unique<SingleBodyGenerator>(settings));
+
+                for (int i = 0; i < 50; ++i) {
+                    auto[mass, pos, vel, acc] = universe->getInternalState()[0];
+                    REQUIRE(mass == 1);
+                    REQUIRE(pos == Vec3<fp>(i, i, i));
+                    REQUIRE(vel == Vec3<fp>{1, 1, 1});
+                    REQUIRE(acc == Vec3<fp>{0, 0, 0});
+
+                    universe->step(1);
+                }
             }
-            catch (NotImplementedUniverseException &e) {
-                continue;
-            }
-
-            universe->init(std::make_unique<SingleBodyGenerator>(settings));
-
-
-
         }
+        WHEN("Computing the evolution of a trivial binary system") {
+            addSettings("numberOfBodies", 2);
+            addSettings("timeStep", 0.001);
+            for (const auto &s : settings) {
+                Settings settings{s};
+                std::unique_ptr<UniverseBase> universe;
+                try {
+                    universe = getConcreteUniverse(Settings{s});
+                }
+                catch (NotImplementedUniverseException &e) {
+                    continue;
+                }
+                universe->init(std::make_unique<BinaryBodyGenerator>(settings));
 
+                for (int i = 0; i < 100; ++i) {
+                    for (auto &[mass, pos, vel, acc] : universe->getInternalState()) {
+                        //std::cout << mass << ", " << pos << ", " << vel << "\n";
+                        REQUIRE(mass == 1);
+                        REQUIRE(pos.norm() == Approx(1.0).epsilon(0.00005));
+                        REQUIRE(vel.norm() == Approx(0.5).epsilon(0.0001));
+                    }
+                    //std::cout<<"\n";
+                    universe->step(500);
+                }
+            }
+        }
 
 
     }

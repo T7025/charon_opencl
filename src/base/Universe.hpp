@@ -26,10 +26,16 @@ public:
 
     virtual void logInternalState(std::ostream &out) = 0;
 
+    /**
+     * Only used for testing.
+     */
+    std::vector<std::tuple<fp, Vec3<fp>, Vec3<fp>, Vec3<fp>>> getInternalState();
+
     virtual void step(unsigned int numSteps) = 0;
 
 protected:
     Settings settings;
+    bool doneFirstStep = false;
 };
 
 template <enum Algorithm algorithm, enum Platform platform, typename FP>
