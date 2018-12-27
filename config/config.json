@@ -5,7 +5,7 @@
   "algorithm": "brute-force",
   "platform": "opencl",
   "floatingPointType": "double",
-  "numberOfBodies": 100,
+  "numberOfBodies": 1000,
   "timeStep": 0.01,
   "snapshotDelta": 10,
   "nrOfSteps": 50,

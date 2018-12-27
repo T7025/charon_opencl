@@ -45,8 +45,8 @@ SCENARIO("Test the position update function", "[universe]") {
         };
 
         addSettings("algorithm", "brute-force", "barnes-hut");
-        addSettings("platform", "cpu-single-thread", "cpu-multi-thread");
-//        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
+//        addSettings("platform", "cpu-single-thread", "cpu-multi-thread");
+        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
 //        addSettings("platform", "cpu-single-thread");
         addSettings("floatingPointType", "float", "double");
         addSettings("rngSeed", 1302);
