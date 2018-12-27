@@ -49,6 +49,7 @@ SCENARIO("Test the position update function", "[universe]") {
         addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
 //        addSettings("platform", "cpu-single-thread");
         addSettings("floatingPointType", "float", "double");
+//        addSettings("floatingPointType", "double");
         addSettings("rngSeed", 1302);
 
         WHEN("Computing the evolution of a trivial single body system") {
@@ -76,6 +77,7 @@ SCENARIO("Test the position update function", "[universe]") {
                 }
             }
         }
+//        if (false)
         WHEN("Computing the evolution of a trivial binary system") {
             addSettings("numberOfBodies", 2);
             addSettings("timeStep", 0.001);

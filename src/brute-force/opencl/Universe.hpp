@@ -54,14 +54,24 @@ public:
     void logInternalState(std::ostream &out) override {
         assert(mass.size() == position.size() && mass.size() == velocity.size() && mass.size() == acceleration.size());
 
+//        std::cout << "before: \n";
+//        for (const auto &pos : position) {
+//            std::cout << pos <<"\n";
+//        }
+
         cl::copy(*queue, *positionBuffer, position.begin(), position.end());
         cl::copy(*queue, *velocityBuffer, velocity.begin(), velocity.end());
         cl::copy(*queue, *accelerationBuffer, acceleration.begin(), acceleration.end());
+        queue->flush();
 
+//        std::cout << "after: \n";
+//        for (const auto &pos : position) {
+//            std::cout << pos <<"\n";
+//        }
         out << "mass,xPos,yPos,zPos,xVel,yVel,zVel,xAcc,yAcc,zAcc\n";
         for (unsigned i = 0; i < mass.size(); ++i) {
             out << mass[i] << ' ' << position[i] << ' ' << velocity[i] << ' ' << acceleration[i] << '\n';
-            std::cout << mass[i] << ' ' << position[i] << ' ' << velocity[i] << ' ' << acceleration[i] << '\n';
+//            std::cout << mass[i] << ' ' << position[i] << ' ' << velocity[i] << ' ' << acceleration[i] << '\n';
         }
     }
 

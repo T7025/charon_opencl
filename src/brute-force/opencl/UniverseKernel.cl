@@ -14,8 +14,9 @@ void kernel calcNextPositionDouble(
         //printf("skip %i\n", i);
         return;
     }
-
+//    printf(" - before(%d): %f %f %f\n", i, position[i].x, position[i].y, position[i].z);
     position[i] += velocity[i] * (double3)(timeStep) + acceleration[i] * (double3)(timeStep * timeStep * 0.5);
+//    printf(" - after(%d): %f %f %f\n", i, position[i].x, position[i].y, position[i].z);
 //    const double txtdiv2 = timeStep * timeStep / 2.0;
 //    position[i].x += velocity[i].x * timeStep + acceleration[i].x * txtdiv2;
 //    position[i].y += velocity[i].y * timeStep + acceleration[i].y * txtdiv2;
@@ -39,7 +40,7 @@ void kernel calcFirstAccelerationDouble(
         const double temp = rsqrt(dot(diff, diff) + softeningLength * softeningLength);
         acc += diff * (double3)(mass[j] * pown(temp, 3));
     }
-    velocity[gid] = acc * (double3)(timeStep);
+    velocity[gid] += acc * (double3)(timeStep);
     acceleration[gid] = acc;
 }
 
@@ -60,9 +61,9 @@ void kernel calcAccelerationDouble(
         const double temp = rsqrt(dot(diff, diff) + softeningLength * softeningLength);
         acc += diff * (double3)(mass[j] * pown(temp, 3));
     }
-    velocity[gid] = (acceleration[gid] + acc) * (double3)(timeStep * 0.5);
+    velocity[gid] += (acceleration[gid] + acc) * (double3)(timeStep * 0.5);
     acceleration[gid] = acc;
-    printf("vel: %f %f %f\n", velocity[gid].x, velocity[gid].y, velocity[gid].z);
+//    printf("vel: %f %f %f\n", velocity[gid].x, velocity[gid].y, velocity[gid].z);
 
 
 //    barrier(CLK_LOCAL_MEM_FENCE);
@@ -101,8 +102,9 @@ if (i >= numBodies) {
 //printf("skip %i\n", i);
 return;
 }
-
+//printf(" - before(%d): %f %f %f\n", i, position[i].x, position[i].y, position[i].z);
 position[i] += velocity[i] * (float3)(timeStep) + acceleration[i] * (float3)(timeStep * timeStep * 0.5);
+//printf(" - after(%d): %f %f %f\n", i, position[i].x, position[i].y, position[i].z);
 //    const float txtdiv2 = timeStep * timeStep / 2.0;
 //    position[i].x += velocity[i].x * timeStep + acceleration[i].x * txtdiv2;
 //    position[i].y += velocity[i].y * timeStep + acceleration[i].y * txtdiv2;
@@ -126,7 +128,7 @@ const float3 diff = position[j] - position[gid];
 const float temp = rsqrt(dot(diff, diff) + softeningLength * softeningLength);
 acc += diff * (float3)(mass[j] * pown(temp, 3));
 }
-velocity[gid] = acc * (float3)(timeStep);
+velocity[gid] += acc * (float3)(timeStep);
 acceleration[gid] = acc;
 }
 
@@ -147,9 +149,9 @@ const float3 diff = position[j] - position[gid];
 const float temp = rsqrt(dot(diff, diff) + softeningLength * softeningLength);
 acc += diff * (float3)(mass[j] * pown(temp, 3));
 }
-velocity[gid] = (acceleration[gid] + acc) * (float3)(timeStep * 0.5);
+velocity[gid] += (acceleration[gid] + acc) * (float3)(timeStep * 0.5);
 acceleration[gid] = acc;
-printf("vel: %d %d %d\n", velocity[gid].x, velocity[gid].y, velocity[gid].z);
+//    printf("vel: %f %f %f\n", velocity[gid].x, velocity[gid].y, velocity[gid].z);
 
 
 //    barrier(CLK_LOCAL_MEM_FENCE);
