@@ -56,5 +56,7 @@ matrix:
 script: [
   "cmake -DCMAKE_BUILD_TYPE=RELEASE ..",
   "cmake --build .",
-  "ctest",
+#  "ctest",
+  "cd test",
+  "./charon_test"
 ]
