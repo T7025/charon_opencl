@@ -86,6 +86,8 @@ void Simulator::run() {
     }};
     progress.detach();
 
+    auto start = std::chrono::steady_clock::now();
+
     snapshot(0);
     while (*step < settings.nrOfSteps - settings.nrOfSteps % settings.snapshotDelta) {
         universe->step(settings.snapshotDelta);
@@ -98,6 +100,10 @@ void Simulator::run() {
     }
 
     printProgress();
+
+    auto end = std::chrono::steady_clock::now();
+    auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "total duration: " << diff.count() << "ms" << "\n";
 
 }
 

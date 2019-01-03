@@ -97,9 +97,11 @@ public:
             calcNextPosition(eArgs,
                              *positionBuffer, *velocityBuffer, *accelerationBuffer, settings.timeStep,
                              (int) mass.size());
+//            queue->flush();
             calcFirstAcceleration(eArgs,
                              *massBuffer, *positionBuffer, *velocityBuffer, *accelerationBuffer,
                              settings.timeStep, settings.softeningLength, (int) mass.size());
+//            queue->flush();
             doneFirstStep = true;
             numSteps--;
         }
@@ -108,42 +110,20 @@ public:
             calcNextPosition(eArgs,
                              *positionBuffer, *velocityBuffer, *accelerationBuffer, settings.timeStep,
                              (int) mass.size());
+//            queue->flush();
             calcAcceleration(eArgs,
                              *massBuffer, *positionBuffer, *velocityBuffer, *accelerationBuffer,
                              settings.timeStep, settings.softeningLength, (int) mass.size());
-
-//            for (unsigned i = 0; i < mass.size(); ++i) {
-//                auto newAcceleration = calcAcceleration(i);
-//                velocity[i] += newAcceleration * settings.timeStep;
-//                acceleration[i] = newAcceleration;
-//            }
+//            queue->flush();
         }
+//        queue->flush();
     }
 
+    void finish() override {
+        queue->finish();
+    };
 
 private:
-    /*void calcNextPosition() {
-        for (unsigned i = 0; i < mass.size(); ++i) {
-            position[i] +=
-                    velocity[i] * settings.timeStep + acceleration[i] * settings.timeStep * settings.timeStep / 2;
-        }
-    }
-
-    Vec3<FP> calcAcceleration(const unsigned int target) const {
-        Vec3<FP> newAcceleration{0, 0, 0};
-        for (unsigned j = 0; j < mass.size(); ++j) {
-//            if (target == j) continue;
-            const Vec3<FP> diff = position[j] - position[target];
-//            FP norm = diff.norm();
-//            newAcceleration += diff * (mass[j] / (norm * norm * norm));
-            FP temp = sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z +
-                           settings.softeningLength * settings.softeningLength);
-            newAcceleration += diff * (mass[j] / (temp * temp * temp));
-
-        }
-        return newAcceleration;
-    }*/
-
     cl::Platform platform;
     cl::Device device;
     std::unique_ptr<cl::Context> context;
@@ -200,6 +180,7 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
     }
     device = cl::Device(allDevices[0]);
 
+    /*
     std::cout << "Using platform: " << platform.getInfo<CL_PLATFORM_NAME>() << "\n";
     std::cout << "Using device: " << device.getInfo<CL_DEVICE_NAME>() << "\n";
     auto printVector = [](const auto &vec) {
@@ -211,7 +192,7 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
     std::cout << "Max work item sizes: " << printVector(device.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>()) << "\n";
     std::cout << "Max work item dimensions: " << device.getInfo<CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS>() << "\n";
     std::cout << "Max work group size: " << device.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>() << "\n";
-
+    */
     context = std::make_unique<cl::Context>(device);
 
 
@@ -229,7 +210,7 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
     }
 
     program = cl::Program{*context, sources};
-    std::cout << "Building kernels...\n";
+//    std::cout << "Building kernels...\n";
     try {
         program.build({device});
     }
@@ -238,66 +219,7 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
         std::cout << e.getBuildLog().size() << "\n";
     }
 
-    queue = std::make_unique<cl::CommandQueue>(*context, device);
-/*
-    //------------------ Below is experimental
-
-
-    cl::Buffer buffer_A(*context, CL_MEM_READ_WRITE, sizeof(int) * 10);
-    cl::Buffer buffer_B(*context, CL_MEM_READ_WRITE, sizeof(int) * 10);
-    cl::Buffer buffer_C(*context, CL_MEM_READ_WRITE, sizeof(int) * 10);
-
-    int A[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    int B[] = {0, 1, 2, 0, 1, 2, 0, 1, 2, 0};
-
-    cl::CommandQueue queue(*context, device);
-
-    queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(int) * 10, A);
-    queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * 10, B);
-
-    //run the kernel
-//    cl::KernelFunctor simple_add(cl::Kernel(program,"simple_add"),queue,cl::NullRange,cl::NDRange(10),cl::NullRange);
-//    simple_add(buffer_A,buffer_B,buffer_C);
-
-//    auto simple_add = cl::make_kernel<cl::Buffer&, cl::Buffer&, cl::Buffer&>(program, "simple_add");
-//    cl::EnqueueArgs eargs(queue,cl::NullRange,cl::NDRange(10),cl::NullRange);
-//    simple_add(eargs, buffer_A,buffer_B,buffer_C).wait();
-
-    //alternative way to run the kernel
-    //
-//    cl::Kernel kernel_add=cl::Kernel(program,"simple_add");
-//    kernel_add.setArg(0,buffer_A);
-//    kernel_add.setArg(1,buffer_B);
-//    kernel_add.setArg(2,buffer_C);
-//    queue.enqueueNDRangeKernel(kernel_add,cl::NullRange,cl::NDRange(10),cl::NullRange);
-//    queue.finish();
-    //
-
-//    auto kernel = cl::make_kernel<cl::Buffer&, cl::Buffer&, cl::Buffer&>(program, "simple_add");
-//    cl::EnqueueArgs eArgs(queue, cl::NullRange, cl::NDRange(10), cl::NullRange);
-//    kernel(eArgs, buffer_A, buffer_B, buffer_C);
-
-    cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer> simple_add(program, "simple_add");
-    cl::EnqueueArgs eArgs(queue, cl::NullRange, cl::NDRange(10), cl::NullRange);
-    simple_add(eArgs, buffer_A, buffer_B, buffer_C);
-
-
-    int C[10];
-    //read result C from the device to array C
-    queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int) * 10, C);
-
-
-    queue.finish();
-
-    std::cout << " result: \n";
-    for (int i = 0; i < 10; i++) {
-        std::cout << C[i] << " ";
-    }
-    //*/
-
-
-
-    std::cout << "\n";
+    queue = std::make_unique<cl::CommandQueue>(*context, device, CL_QUEUE_PROFILING_ENABLE);
 
     for (unsigned i = 0; i < settings.numberOfBodies; ++i) {
         auto[m, pos, vel] = bodyGenerator->getBody();
@@ -318,37 +240,9 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
     accelerationBuffer = std::make_unique<cl::Buffer>(*context,
                                                       CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                                                       sizeof(FP) * acceleration.size() * 4, acceleration.data());
-//    massBuffer = std::make_unique<cl::Buffer>(mass.begin(), mass.end(), true);  // 3d argument: read only?
-//    positionBuffer = std::make_unique<cl::Buffer>(position.begin(), position.end(), false);
-//    velocityBuffer = std::make_unique<cl::Buffer>(velocity.begin(), velocity.end(), false);
-//    accelerationBuffer = std::make_unique<cl::Buffer>(acceleration.begin(), acceleration.end(), false);
 
     localWorkSize = 64;
     globalWorkSize = (unsigned) (mass.size() / localWorkSize + 1) * localWorkSize;
 
-
-    std::cout << "Size of mass values: " << massBuffer->getInfo<CL_MEM_SIZE>() << " bytes\n";
-
-//    queue->enqueueWriteBuffer(*massBuffer, CL_TRUE, 0, sizeof(FP) * mass.size(), mass.data());
-
-    /*
-    std::vector<typename CLFloatTypeGet<FP>::value_type> t;
-
-
-    if constexpr(sizeof(FP) == sizeof(double)) {
-        std::vector<cl_double3> tempPos;
-        for (const auto &p : position) {
-            tempPos.emplace_back(cl_double3{p.x, p.y, p.z});
-        }
-        queue->enqueueWriteBuffer(*positionBuffer, CL_TRUE, 0, sizeof(cl_double3) * tempPos.size(), tempPos.data());
-
-    }
-    else if constexpr(sizeof(FP) == sizeof(float)) {
-        std::vector<cl_float3> tempPos;
-        for (const auto &p : position) {
-            tempPos.emplace_back(cl_float3{p.x, p.y, p.z});
-        }
-        queue->enqueueWriteBuffer(*positionBuffer, CL_TRUE, 0, sizeof(cl_float3) * tempPos.size(), tempPos.data());
-    }
-*/
+//    std::cout << "Size of mass values: " << massBuffer->getInfo<CL_MEM_SIZE>() << " bytes\n";
 }

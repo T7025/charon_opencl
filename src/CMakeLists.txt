@@ -23,7 +23,7 @@ add_library(
         base/BodyGenerator.hpp
         BodyGenerators/SphereBodyGenerator.cpp
         BodyGenerators/SphereBodyGenerator.hpp
-        BodyGenerators/BinaryBodyGenerator.cpp BodyGenerators/BinaryBodyGenerator.hpp base/getConcreteUniverse.cpp base/getConcreteUniverse.hpp base/Exceptions.cpp base/Exceptions.hpp base/ConcreteUniverseInclude.hpp)
+        BodyGenerators/BinaryBodyGenerator.cpp BodyGenerators/BinaryBodyGenerator.hpp base/getConcreteUniverse.cpp base/getConcreteUniverse.hpp base/Exceptions.cpp base/Exceptions.hpp base/ConcreteUniverseInclude.hpp barnes_hut/cpu-single-thread/Universe.cpp barnes_hut/cpu-single-thread/Universe.hpp)
 target_compile_features(libcharon PUBLIC cxx_std_17)
 
 target_compile_options(

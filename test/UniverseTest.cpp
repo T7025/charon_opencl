@@ -11,6 +11,7 @@
 #include <base/Exceptions.hpp>
 #include <iostream>
 #include <BodyGenerators/BinaryBodyGenerator.hpp>
+#include <BodyGenerators/SphereBodyGenerator.hpp>
 
 class SingleBodyGenerator : public BodyGenerator {
 public:
@@ -45,11 +46,9 @@ SCENARIO("Test the position update function", "[universe]") {
         };
 
         addSettings("algorithm", "brute-force", "barnes-hut");
-//        addSettings("platform", "cpu-single-thread", "cpu-multi-thread");
         addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
 //        addSettings("platform", "cpu-single-thread");
         addSettings("floatingPointType", "float", "double");
-//        addSettings("floatingPointType", "double");
         addSettings("rngSeed", 1302);
 
         WHEN("Computing the evolution of a trivial single body system") {
@@ -77,7 +76,6 @@ SCENARIO("Test the position update function", "[universe]") {
                 }
             }
         }
-//        if (false)
         WHEN("Computing the evolution of a trivial binary system") {
             addSettings("numberOfBodies", 2);
             addSettings("timeStep", 0.001);
@@ -104,20 +102,48 @@ SCENARIO("Test the position update function", "[universe]") {
                 }
             }
         }
+        WHEN("Computing the evolution of a 128 body system") {
+            int numBodies = 128;
+            double timeStep = 0.001;
+            unsigned numSteps = 50;
 
+            addSettings("numberOfBodies", numBodies);
+            addSettings("timeStep", timeStep);
 
-    }
-    GIVEN("A json object containing parsable settings") {
-        nlohmann::json json;
-        json["resultsDir"] = "testRes";
-        json["numberOfBodies"] = 500;
+            nlohmann::json baselineUniverseSettings{};
+            baselineUniverseSettings["numberOfBodies"] = numBodies;
+            baselineUniverseSettings["timeStep"] = timeStep;
+            baselineUniverseSettings["algorithm"] = "brute-force";
+            baselineUniverseSettings["platform"] = "cpu-single-thread";
+            baselineUniverseSettings["floatingPointType"] = "double";
+            baselineUniverseSettings["rngSeed"] = 1302;
 
-        WHEN("A Settings object is initialized with the json object") {
-            Settings settings{json};
-            THEN("The Settings object should reflect the configuration values in the json object") {
-                REQUIRE(settings.resultsDir == json["resultsDir"]);
-                REQUIRE(settings.numberOfBodies == json["numberOfBodies"]);
+            auto baselineUniverse = getConcreteUniverse(Settings{baselineUniverseSettings});
+            baselineUniverse->init(std::make_unique<SphereBodyGenerator>(Settings{baselineUniverseSettings}));
+            baselineUniverse->step(numSteps);
+            auto baselineResult = baselineUniverse->getInternalState();
+
+            for (const auto &s : settings) {
+                std::unique_ptr<UniverseBase> universe;
+                try {
+                    universe = getConcreteUniverse(Settings{s});
+                }
+                catch (NotImplementedUniverseException &e) {
+                    continue;
+                }
+                universe->init(std::make_unique<SphereBodyGenerator>(Settings{s}));
+                universe->step(numSteps);
+                auto result = universe->getInternalState();
+                for (unsigned i = 0; i < result.size(); ++i) {
+                    const auto &[baselineMass, baselinePos, baselineVel, baselineAcc] = baselineResult[i];
+                    const auto &[mass, pos, vel, acc] = result[i];
+                    REQUIRE(mass == Approx(baselineMass));
+                    REQUIRE(pos.norm() == Approx(baselinePos.norm()));
+                    REQUIRE(vel.norm() == Approx(baselineVel.norm()));
+                    REQUIRE(acc.norm() == Approx(baselineAcc.norm()));
+                }
             }
         }
     }
+
 }

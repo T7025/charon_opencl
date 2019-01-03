@@ -33,6 +33,11 @@ public:
 
     virtual void step(unsigned int numSteps) = 0;
 
+    /**
+     * Useful for benchmarking OpenCL code.
+     */
+    virtual void finish() {};
+
 protected:
     Settings settings;
     bool doneFirstStep = false;
