@@ -83,26 +83,23 @@ std::vector<nlohmann::json> getSettings() {
     addSettings("barnesHutCutoff", 0.7);
     addSettings("numberOfBodies", 128, 256, 512, 1024, 2048, 4096);
 
-
-//    for (const auto &s : settings) {
-//        std::cout << s << "\n";
-//    }
-
     return settings;
 }
 
-
-class NullBuffer : public std::streambuf {
-public:
-    int overflow(int c) { return c; }
-};
-
 using std::chrono::steady_clock;
+using std::chrono::duration;
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
+using std::chrono::nanoseconds;
 using std::chrono::seconds;
+using namespace std::chrono_literals;
 
 int main() {
+    std::vector<nlohmann::json> results;
+
+    typedef std::chrono::duration<double, std::nano> NS;
+    NS ns = typename steady_clock::duration(1);
+    std::cout << "Time resolution: " << ns.count() << "ns\n";
 
     omp_set_num_threads(6);
     // Create standard json settings (with lib)
@@ -113,23 +110,13 @@ int main() {
 //    std::cout << "vector of floats: " << sizeof(std::vector<float>{}) << " bytes\n";
 //    std::cout << "vector of doubles: " << sizeof(std::vector<double>{}) << " bytes\n";
 
-    std::string resultsDir = "benchResults";
-    if (!std::filesystem::exists(resultsDir)) {
-        std::filesystem::create_directory(resultsDir);
-    }
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-    std::stringstream ss;
-    ss << std::put_time(&tm, "%Y%m%d-%H%M%S");
-    auto outputDir = resultsDir + '/' + ss.str();
-    std::filesystem::create_directory(outputDir);
 
-
-    std::vector<nlohmann::json> results;
 
     auto settings = getSettings();
     for (const auto &s : settings) {
         Settings setting{s};
+
+        auto beforeInit = steady_clock::now();
         std::unique_ptr<UniverseBase> universe;
         try {
             universe = getConcreteUniverse(setting);
@@ -138,37 +125,64 @@ int main() {
             continue;
         }
         universe->init(std::make_unique<SphereBodyGenerator>(setting));
+        universe->finish();
+        auto afterInit = steady_clock::now();
+        auto beforeSingleStep = steady_clock::now();
         universe->step(1);
         universe->finish();
+        auto afterSingleStep = steady_clock::now();
+        duration<double> expectedStepTime = afterSingleStep - beforeSingleStep;
 
-        auto start = steady_clock::now();
+        duration<double> requestedDuration = 5s;
+        int minNumIterations = 10;
+
+        int requestedNumIterations = (int) std::max(std::round(requestedDuration.count() / expectedStepTime.count()),
+                                                    (double) minNumIterations);
+
+        auto beforeSteps = steady_clock::now();
         int numIterations = 0;
-        while (numIterations < 30 &&
-               (duration_cast<seconds>(steady_clock::now() - start).count() < 10 || numIterations > 10)) {
+        while (numIterations < requestedNumIterations && (numIterations > minNumIterations || duration_cast<seconds>(
+                steady_clock::now() - beforeSteps).count() < 10)) {
             universe->step(1);
             ++numIterations;
         }
-
         universe->finish();
-//        NullBuffer nullBuffer{};
-//        std::ostream nullStream{&nullBuffer};
-//        universe->logInternalState(nullStream);  // Make sure queue gets flushed when using OpenCL
+        auto afterSteps = steady_clock::now();
 
-        auto end = steady_clock::now();
-        auto diff = duration_cast<milliseconds>(end - start);
-        std::cout << s << "\n";
-        std::cout << "Average duration after " << numIterations << " steps: " << diff.count() / numIterations << "ms"
-                  << "\n";
+        auto initDuration = duration_cast<nanoseconds>(afterInit - beforeInit);
+        auto stepDuration = duration_cast<nanoseconds>(afterSteps - beforeSteps) / numIterations;
+        auto totalDuration = initDuration + (afterSteps - beforeSteps);
+
+        std::cout << "Settings: " << s << "\n";
+        std::cout << "Requested # iterations: " << requestedNumIterations << "\n";
+        std::cout << "Total benchmark duration: " << duration<double>(totalDuration).count() << "s\n";
+        std::cout << "Init duration: " << duration<double>(initDuration).count() << "s\n";
+        std::cout << "Average step duration after " << numIterations << " steps: " << stepDuration.count()
+                  << "ns (= " << duration<double>(stepDuration).count() << "s)\n";
+        std::cout << std::endl;
         nlohmann::json resultJson{};
         resultJson["settings"] = s;
+        resultJson["totalDuration"] = totalDuration.count();
+        resultJson["initDuration"] = initDuration.count();
+        resultJson["stepDuration"] = stepDuration.count();
         resultJson["numIterations"] = numIterations;
-        resultJson["stepDuration"] = diff.count() / numIterations;
-        std::cout << "resultJson: " << resultJson << "\n";
         results.emplace_back(resultJson);
     }
 
-    if (std::ofstream out{outputDir + ".json"}; out.is_open()) {
-        out << nlohmann::json{results} << "\n";
+    std::string resultsDir = "benchResults";
+    if (!std::filesystem::exists(resultsDir)) {
+        std::filesystem::create_directory(resultsDir);
+    }
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y%m%d-%H%M%S");
+    auto outputFile = resultsDir + '/' + ss.str();
+    if (std::ofstream out{outputFile + ".json"}; out.is_open()) {
+        nlohmann::json result{};
+        result["benchmarks"] = results;
+        result["timeResolutionInNs"] = ns.count();
+        out << result.dump(4) << "\n";
     }
     else {
         throw std::runtime_error{"could not write to file"};
