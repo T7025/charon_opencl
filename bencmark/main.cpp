@@ -79,9 +79,10 @@ std::vector<nlohmann::json> getSettings() {
 
     addSettings("algorithm", "brute-force", "barnes-hut");
     addSettings("floatingPointType", "float", "double");
-    addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
+//    addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
+    addSettings("platform", "opencl");
     addSettings("barnesHutCutoff", 0.7);
-    addSettings("numberOfBodies", 128, 256, 512, 1024, 2048, 4096);
+    addSettings("numberOfBodies", 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144);
 
     return settings;
 }
@@ -93,6 +94,7 @@ using std::chrono::milliseconds;
 using std::chrono::nanoseconds;
 using std::chrono::seconds;
 using namespace std::chrono_literals;
+
 
 int main() {
     std::vector<nlohmann::json> results;
@@ -141,10 +143,12 @@ int main() {
 
         auto beforeSteps = steady_clock::now();
         int numIterations = 0;
-        while (numIterations < requestedNumIterations && (numIterations > minNumIterations || duration_cast<seconds>(
+        while (numIterations < requestedNumIterations && (numIterations < minNumIterations || duration_cast<seconds>(
                 steady_clock::now() - beforeSteps).count() < 10)) {
             universe->step(1);
             ++numIterations;
+//            if (numIterations > requestedNumIterations || (numIterations > minNumIterations && duration_cast<seconds>(
+//                    steady_clock::now() - beforeSteps).count() > 10))
         }
         universe->finish();
         auto afterSteps = steady_clock::now();
