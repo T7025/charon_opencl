@@ -3,11 +3,11 @@
   "resultsDir": "results",
   "resultsFilenamePrefix": "out_",
   "algorithm": "brute-force",
-  "platform": "cpu-multi-thread",
+  "platform": "opencl",
   "floatingPointType": "double",
-  "numberOfBodies": 2000,
+  "numberOfBodies": 100,
   "timeStep": 0.01,
   "snapshotDelta": 10,
-  "nrOfSteps": 100,
+  "nrOfSteps": 50,
   "softeningLength": 0.005
 }

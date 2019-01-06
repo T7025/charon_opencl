@@ -46,9 +46,10 @@ SCENARIO("Test the position update function", "[universe]") {
         };
 
         addSettings("algorithm", "brute-force", "barnes-hut");
-        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
-//        addSettings("platform", "cpu-single-thread");
-        addSettings("floatingPointType", "float", "double");
+//        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
+        addSettings("platform", "opencl");
+//        addSettings("floatingPointType", "float", "double");
+        addSettings("floatingPointType", "double");
         addSettings("rngSeed", 1302);
 
         WHEN("Computing the evolution of a trivial single body system") {
@@ -69,8 +70,8 @@ SCENARIO("Test the position update function", "[universe]") {
                     auto[mass, pos, vel, acc] = universe->getInternalState()[0];
                     REQUIRE(mass == 1);
                     REQUIRE(pos == Vec3<fp>(i, i, i));
-                    REQUIRE(vel == Vec3<fp>{1, 1, 1});
-                    REQUIRE(acc == Vec3<fp>{0, 0, 0});
+                    CHECK(vel == Vec3<fp>{1, 1, 1});
+                    CHECK(acc == Vec3<fp>{0, 0, 0});
 
                     universe->step(1);
                 }

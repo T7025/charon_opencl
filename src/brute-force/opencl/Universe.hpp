@@ -21,13 +21,13 @@ template <> struct CLFloatTypeGet<double> {
 //    typedef cl_double value_type;
     typedef double value_type;
     typedef cl_double3 value_type3;
-    static constexpr const char *kernelSuffix = "Double";
+    static constexpr const char *fpName = "double";
 };
 template <> struct CLFloatTypeGet<float> {
 //    typedef cl_float value_type;
     typedef float value_type;
     typedef cl_float3 value_type3;
-    static constexpr const char *kernelSuffix = "Float";
+    static constexpr const char *fpName = "float";
 };
 
 std::ostream &operator<<(std::ostream &out, const cl_double3 &val) {
@@ -83,25 +83,24 @@ public:
                 cl::NDRange(localWorkSize)
         );
         cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl_fp, int> calcNextPosition(
-                program, std::string{"calcNextPosition"} + CLFloatTypeGet<FP>::kernelSuffix
+                program, std::string{"calcNextPosition"}
         );
         // Local: cl::LocalSpaceArg
-        cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl_fp, cl_fp, int> calcFirstAcceleration(
-                program, std::string{"calcFirstAcceleration"} + CLFloatTypeGet<FP>::kernelSuffix
+        cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::LocalSpaceArg, cl::LocalSpaceArg, cl_fp, cl_fp, int> calcFirstAcceleration(
+                program, std::string{"calcFirstVecAndAcc"}
         );
-        cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl_fp, cl_fp, int> calcAcceleration(
-                program, std::string{"calcAcceleration"} + CLFloatTypeGet<FP>::kernelSuffix
+        cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::LocalSpaceArg, cl::LocalSpaceArg, cl_fp, cl_fp, int> calcAcceleration(
+                program, std::string{"calcVecAndAcc"}
         );
 
         if (!doneFirstStep) {
             calcNextPosition(eArgs,
                              *positionBuffer, *velocityBuffer, *accelerationBuffer, settings.timeStep,
                              (int) mass.size());
-//            queue->flush();
             calcFirstAcceleration(eArgs,
-                             *massBuffer, *positionBuffer, *velocityBuffer, *accelerationBuffer,
-                             settings.timeStep, settings.softeningLength, (int) mass.size());
-//            queue->flush();
+                                  *massBuffer, *positionBuffer, *velocityBuffer, *accelerationBuffer,
+                                  cl::Local(localWorkSize * sizeof(FP)), cl::Local(localWorkSize * sizeof(cl_fp3)),
+                                  settings.timeStep, settings.softeningLength, (int) mass.size());
             doneFirstStep = true;
             numSteps--;
         }
@@ -110,13 +109,11 @@ public:
             calcNextPosition(eArgs,
                              *positionBuffer, *velocityBuffer, *accelerationBuffer, settings.timeStep,
                              (int) mass.size());
-//            queue->flush();
             calcAcceleration(eArgs,
                              *massBuffer, *positionBuffer, *velocityBuffer, *accelerationBuffer,
+                             cl::Local(localWorkSize * sizeof(FP)), cl::Local(localWorkSize * sizeof(cl_fp3)),
                              settings.timeStep, settings.softeningLength, (int) mass.size());
-//            queue->flush();
         }
-//        queue->flush();
     }
 
     void finish() override {
@@ -200,6 +197,8 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
     kernelFileName.replace_filename("UniverseKernel.cl");
     if (std::ifstream kernelFile{kernelFileName}; kernelFile) {
         std::ostringstream ss;
+        ss << "#define FP " << CLFloatTypeGet<FP>::fpName << "\n";
+        ss << "#define FP3 " << CLFloatTypeGet<FP>::fpName << "3" << "\n";
         ss << kernelFile.rdbuf();
         const std::string &str = ss.str();
         //std::cout << "\n" << str << "\n";
@@ -229,20 +228,23 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
         acceleration.emplace_back(cl_fp3{0, 0, 0});
     }
 
+
     massBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_ONLY | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                              sizeof(FP) * mass.size(), mass.data());
+                                              mass.size() * sizeof(cl_fp), mass.data());
     positionBuffer = std::make_unique<cl::Buffer>(*context,
                                                   CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                                  sizeof(FP) * position.size() * 4, position.data());
+                                                  position.size() * sizeof(cl_fp3), position.data());
     velocityBuffer = std::make_unique<cl::Buffer>(*context,
                                                   CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                                  sizeof(FP) * velocity.size() * 4, velocity.data());
+                                                  velocity.size() * sizeof(cl_fp3), velocity.data());
     accelerationBuffer = std::make_unique<cl::Buffer>(*context,
                                                       CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                                      sizeof(FP) * acceleration.size() * 4, acceleration.data());
+                                                      acceleration.size() * sizeof(cl_fp3), acceleration.data());
 
     localWorkSize = 64;
     globalWorkSize = (unsigned) (mass.size() / localWorkSize + 1) * localWorkSize;
+
+//    std::cout << " - localWorkSize: " << localWorkSize << ", globalWorkSize: " << globalWorkSize << "\n";
 
 //    std::cout << "Size of mass values: " << massBuffer->getInfo<CL_MEM_SIZE>() << " bytes\n";
 }
