@@ -1,0 +1,317 @@
+{
+    "benchmarks": [
+        {
+            "initDuration": 643949456,
+            "numIterations": 10,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 262144,
+                "platform": "opencl"
+            },
+            "stepDuration": 28545054149,
+            "totalDuration": 286094490954
+        },
+        {
+            "initDuration": 115894274,
+            "numIterations": 10,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 262144,
+                "platform": "opencl"
+            },
+            "stepDuration": 3794182751,
+            "totalDuration": 38057721787
+        },
+        {
+            "initDuration": 108147822,
+            "numIterations": 10,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 131072,
+                "platform": "opencl"
+            },
+            "stepDuration": 7398301283,
+            "totalDuration": 74091160661
+        },
+        {
+            "initDuration": 97145271,
+            "numIterations": 10,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 131072,
+                "platform": "opencl"
+            },
+            "stepDuration": 986480537,
+            "totalDuration": 9961950648
+        },
+        {
+            "initDuration": 96068237,
+            "numIterations": 10,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 65536,
+                "platform": "opencl"
+            },
+            "stepDuration": 1969852083,
+            "totalDuration": 19794589071
+        },
+        {
+            "initDuration": 92165634,
+            "numIterations": 20,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 65536,
+                "platform": "opencl"
+            },
+            "stepDuration": 265879610,
+            "totalDuration": 5409757835
+        },
+        {
+            "initDuration": 92689740,
+            "numIterations": 10,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 32768,
+                "platform": "opencl"
+            },
+            "stepDuration": 493149614,
+            "totalDuration": 5024185883
+        },
+        {
+            "initDuration": 83472772,
+            "numIterations": 85,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 32768,
+                "platform": "opencl"
+            },
+            "stepDuration": 67077842,
+            "totalDuration": 5785089393
+        },
+        {
+            "initDuration": 88735866,
+            "numIterations": 41,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 16384,
+                "platform": "opencl"
+            },
+            "stepDuration": 124839641,
+            "totalDuration": 5207161152
+        },
+        {
+            "initDuration": 81122795,
+            "numIterations": 296,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 16384,
+                "platform": "opencl"
+            },
+            "stepDuration": 18280651,
+            "totalDuration": 5492195552
+        },
+        {
+            "initDuration": 89482952,
+            "numIterations": 151,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 8192,
+                "platform": "opencl"
+            },
+            "stepDuration": 33446723,
+            "totalDuration": 5139938221
+        },
+        {
+            "initDuration": 87887917,
+            "numIterations": 774,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 8192,
+                "platform": "opencl"
+            },
+            "stepDuration": 6484738,
+            "totalDuration": 5107075504
+        },
+        {
+            "initDuration": 88825348,
+            "numIterations": 300,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 4096,
+                "platform": "opencl"
+            },
+            "stepDuration": 16318853,
+            "totalDuration": 4984481334
+        },
+        {
+            "initDuration": 87588576,
+            "numIterations": 1433,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 4096,
+                "platform": "opencl"
+            },
+            "stepDuration": 3108846,
+            "totalDuration": 4542565917
+        },
+        {
+            "initDuration": 85627593,
+            "numIterations": 590,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 2048,
+                "platform": "opencl"
+            },
+            "stepDuration": 8164513,
+            "totalDuration": 4902690647
+        },
+        {
+            "initDuration": 86601529,
+            "numIterations": 2841,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 2048,
+                "platform": "opencl"
+            },
+            "stepDuration": 1541672,
+            "totalDuration": 4466494092
+        },
+        {
+            "initDuration": 86234327,
+            "numIterations": 1100,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 1024,
+                "platform": "opencl"
+            },
+            "stepDuration": 4087858,
+            "totalDuration": 4582878816
+        },
+        {
+            "initDuration": 83334876,
+            "numIterations": 4506,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 1024,
+                "platform": "opencl"
+            },
+            "stepDuration": 770345,
+            "totalDuration": 3554513419
+        },
+        {
+            "initDuration": 88679313,
+            "numIterations": 1571,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 512,
+                "platform": "opencl"
+            },
+            "stepDuration": 2049614,
+            "totalDuration": 3308623418
+        },
+        {
+            "initDuration": 81751935,
+            "numIterations": 6837,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 512,
+                "platform": "opencl"
+            },
+            "stepDuration": 387638,
+            "totalDuration": 2732038218
+        },
+        {
+            "initDuration": 85049071,
+            "numIterations": 3482,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 256,
+                "platform": "opencl"
+            },
+            "stepDuration": 1030569,
+            "totalDuration": 3673492256
+        },
+        {
+            "initDuration": 83721319,
+            "numIterations": 11161,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 256,
+                "platform": "opencl"
+            },
+            "stepDuration": 198533,
+            "totalDuration": 2299553807
+        },
+        {
+            "initDuration": 82713650,
+            "numIterations": 5959,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "double",
+                "numberOfBodies": 128,
+                "platform": "opencl"
+            },
+            "stepDuration": 520656,
+            "totalDuration": 3185303109
+        },
+        {
+            "initDuration": 80634553,
+            "numIterations": 11141,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 128,
+                "platform": "opencl"
+            },
+            "stepDuration": 103697,
+            "totalDuration": 1235926547
+        }
+    ],
+    "timeResolutionInNs": 1.0
+}
