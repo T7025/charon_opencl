@@ -68,12 +68,11 @@ def setLineStyles():
         "#948B3D",
     ]
     for i, color in enumerate(colors):
-        print(f'set style line {i + 1} lt 1 pt 7 lc rgb "{color}" lw 1.5')
+        # print(f'set style line {i + 1} lt 1 pt 7 lc rgb "{color}" lw 1.5')
         c(f'set style line {i + 1} lt 1 pt 7 lc rgb \'{color}\' lw 1.5 pi -1 ps 1.5')
     c("set pointintervalbox 2.5")
 
 
-# s(implementationCompTimes[0]['brute-force-opencl-double'])
 for name, val in implementationCompTimes[0].items():
     s(val, f"{name}.temp")
 
@@ -83,12 +82,17 @@ c(f"set key left")
 
 plots = ""
 for i, name in enumerate(implementationCompTimes[0].keys()):
-    plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1}, '
-
-# c("set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 7 pi -1 ps 1.5")
-print(f'plot {plots}')
+    plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1},'
+plots.rstrip(",")
 
 c(f'plot {plots}')
+
+figure()
+setLineStyles()
+c(f"set key left")
+
+
+
 
 # for filename in [x for x in os.listdir(".") if ".temp" in x]:
 #     os.remove(filename)

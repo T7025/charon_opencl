@@ -1,0 +1,149 @@
+{
+    "info": "explicit use of local memory (GTX970)",
+    "benchmarks": [
+        {
+            "initDuration": 387318843,
+            "numIterations": 24,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 131072,
+                "platform": "opencl"
+            },
+            "stepDuration": 202874288,
+            "totalDuration": 5256301773
+        },
+        {
+            "initDuration": 174922547,
+            "numIterations": 88,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 65536,
+                "platform": "opencl"
+            },
+            "stepDuration": 52862894,
+            "totalDuration": 4826857250
+        },
+        {
+            "initDuration": 207955112,
+            "numIterations": 288,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 32768,
+                "platform": "opencl"
+            },
+            "stepDuration": 15665199,
+            "totalDuration": 4719532431
+        },
+        {
+            "initDuration": 354409617,
+            "numIterations": 862,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 16384,
+                "platform": "opencl"
+            },
+            "stepDuration": 3528392,
+            "totalDuration": 3395884238
+        },
+        {
+            "initDuration": 168661567,
+            "numIterations": 1499,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 8192,
+                "platform": "opencl"
+            },
+            "stepDuration": 1207242,
+            "totalDuration": 1978318394
+        },
+        {
+            "initDuration": 177937906,
+            "numIterations": 2237,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 4096,
+                "platform": "opencl"
+            },
+            "stepDuration": 577071,
+            "totalDuration": 1468847468
+        },
+        {
+            "initDuration": 190356620,
+            "numIterations": 2515,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 2048,
+                "platform": "opencl"
+            },
+            "stepDuration": 281750,
+            "totalDuration": 898960130
+        },
+        {
+            "initDuration": 204643829,
+            "numIterations": 3672,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 1024,
+                "platform": "opencl"
+            },
+            "stepDuration": 146589,
+            "totalDuration": 742920118
+        },
+        {
+            "initDuration": 192372895,
+            "numIterations": 2073,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 512,
+                "platform": "opencl"
+            },
+            "stepDuration": 80071,
+            "totalDuration": 358361269
+        },
+        {
+            "initDuration": 186247533,
+            "numIterations": 4179,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 256,
+                "platform": "opencl"
+            },
+            "stepDuration": 47365,
+            "totalDuration": 384186369
+        },
+        {
+            "initDuration": 184071869,
+            "numIterations": 3835,
+            "settings": {
+                "algorithm": "brute-force",
+                "barnesHutCutoff": 0.7,
+                "floatingPointType": "float",
+                "numberOfBodies": 128,
+                "platform": "opencl"
+            },
+            "stepDuration": 35898,
+            "totalDuration": 321740917
+        }
+    ],
+    "timeResolutionInNs": 1.0
+}

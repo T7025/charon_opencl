@@ -4,10 +4,10 @@
   "resultsFilenamePrefix": "out_",
   "algorithm": "brute-force",
   "platform": "opencl",
-  "floatingPointType": "double",
-  "numberOfBodies": 100,
-  "timeStep": 0.01,
-  "snapshotDelta": 10,
-  "nrOfSteps": 50,
+  "floatingPointType": "float",
+  "numberOfBodies": 10000,
+  "timeStep": 0.001,
+  "snapshotDelta": 50,
+  "nrOfSteps": 25000,
   "softeningLength": 0.005
 }

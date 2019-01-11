@@ -1,4 +1,5 @@
 {
+  "info": "naive implementation",
   "benchmarks": [
     {
       "initDuration": 659969368,

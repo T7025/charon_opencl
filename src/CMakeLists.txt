@@ -23,13 +23,22 @@ add_library(
         base/BodyGenerator.hpp
         BodyGenerators/SphereBodyGenerator.cpp
         BodyGenerators/SphereBodyGenerator.hpp
-        BodyGenerators/BinaryBodyGenerator.cpp BodyGenerators/BinaryBodyGenerator.hpp base/getConcreteUniverse.cpp base/getConcreteUniverse.hpp base/Exceptions.cpp base/Exceptions.hpp base/ConcreteUniverseInclude.hpp barnes_hut/cpu-single-thread/Universe.cpp barnes_hut/cpu-single-thread/Universe.hpp)
+        BodyGenerators/BinaryBodyGenerator.cpp
+        BodyGenerators/BinaryBodyGenerator.hpp
+        base/getConcreteUniverse.cpp
+        base/getConcreteUniverse.hpp
+        base/Exceptions.cpp
+        base/Exceptions.hpp
+        base/ConcreteUniverseInclude.hpp
+        barnes-hut/cpu-single-thread/Universe.cpp
+        barnes-hut/cpu-single-thread/Universe.hpp
+)
 target_compile_features(libcharon PUBLIC cxx_std_17)
 
 target_compile_options(
         libcharon PUBLIC
         -Wall -Wextra
-#        "$<$<CONFIG:DEBUG>:" -Og ">"
+        #        "$<$<CONFIG:DEBUG>:" -Og ">"
         # -fopt-info-vec-optimized/missed/note/all
         "$<$<CONFIG:RELEASE>:" -O3 -march=native -funroll-loops -ftree-vectorize -fopt-info-vec-all=vecreport.txt ">"
 )

@@ -1,4 +1,5 @@
 {
+    "info": "explicit use of local memory",
     "benchmarks": [
         {
             "initDuration": 643949456,

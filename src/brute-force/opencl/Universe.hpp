@@ -68,7 +68,7 @@ public:
 //        for (const auto &pos : position) {
 //            std::cout << pos <<"\n";
 //        }
-        out << "mass,xPos,yPos,zPos,xVel,yVel,zVel,xAcc,yAcc,zAcc\n";
+        out << "mass xPos yPos zPos xVel yVel zVel xAcc yAcc zAcc\n";
         for (unsigned i = 0; i < mass.size(); ++i) {
             out << mass[i] << ' ' << position[i] << ' ' << velocity[i] << ' ' << acceleration[i] << '\n';
 //            std::cout << mass[i] << ' ' << position[i] << ' ' << velocity[i] << ' ' << acceleration[i] << '\n';
