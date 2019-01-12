@@ -7,6 +7,7 @@
 #include <base/Util.hpp>
 #include <base/Universe.hpp>
 #include <base/Vec3.hpp>
+#include <base/OpenCLBase.hpp>
 #include <vector>
 #include <iostream>
 #include <cassert>
@@ -18,13 +19,11 @@
 
 template <typename FP> struct CLFloatTypeGet {};
 template <> struct CLFloatTypeGet<double> {
-//    typedef cl_double value_type;
     typedef double value_type;
     typedef cl_double3 value_type3;
     static constexpr const char *fpName = "double";
 };
 template <> struct CLFloatTypeGet<float> {
-//    typedef cl_float value_type;
     typedef float value_type;
     typedef cl_float3 value_type3;
     static constexpr const char *fpName = "float";
@@ -41,7 +40,7 @@ std::ostream &operator<<(std::ostream &out, const cl_float3 &val) {
 }
 
 template <typename FP>
-class Universe<Algorithm::bruteForce, Platform::openCL, FP> : public UniverseBase {
+class Universe<Algorithm::bruteForce, Platform::openCL, FP> : public UniverseBase, public OpenCLBase {
 public:
     typedef typename CLFloatTypeGet<FP>::value_type3 cl_fp3;
     typedef typename CLFloatTypeGet<FP>::value_type cl_fp;
@@ -54,65 +53,28 @@ public:
     void logInternalState(std::ostream &out) override {
         assert(mass.size() == position.size() && mass.size() == velocity.size() && mass.size() == acceleration.size());
 
-//        std::cout << "before: \n";
-//        for (const auto &pos : position) {
-//            std::cout << pos <<"\n";
-//        }
-
         cl::copy(*queue, *positionBuffer, position.begin(), position.end());
         cl::copy(*queue, *velocityBuffer, velocity.begin(), velocity.end());
         cl::copy(*queue, *accelerationBuffer, acceleration.begin(), acceleration.end());
         queue->flush();
 
-//        std::cout << "after: \n";
-//        for (const auto &pos : position) {
-//            std::cout << pos <<"\n";
-//        }
         out << "mass xPos yPos zPos xVel yVel zVel xAcc yAcc zAcc\n";
         for (unsigned i = 0; i < mass.size(); ++i) {
             out << mass[i] << ' ' << position[i] << ' ' << velocity[i] << ' ' << acceleration[i] << '\n';
-//            std::cout << mass[i] << ' ' << position[i] << ' ' << velocity[i] << ' ' << acceleration[i] << '\n';
         }
     }
 
     void step(unsigned int numSteps) override {
-        cl::EnqueueArgs eArgs(
-                *queue,
-                cl::NullRange,
-                cl::NDRange(globalWorkSize),
-                cl::NDRange(localWorkSize)
-        );
-        cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl_fp, int> calcNextPosition(
-                program, std::string{"calcNextPosition"}
-        );
-        // Local: cl::LocalSpaceArg
-        cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::LocalSpaceArg, cl::LocalSpaceArg, cl_fp, cl_fp, int> calcFirstAcceleration(
-                program, std::string{"calcFirstVecAndAcc"}
-        );
-        cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::LocalSpaceArg, cl::LocalSpaceArg, cl_fp, cl_fp, int> calcAcceleration(
-                program, std::string{"calcVecAndAcc"}
-        );
-
         if (!doneFirstStep) {
-            calcNextPosition(eArgs,
-                             *positionBuffer, *velocityBuffer, *accelerationBuffer, settings.timeStep,
-                             (int) mass.size());
-            calcFirstAcceleration(eArgs,
-                                  *massBuffer, *positionBuffer, *velocityBuffer, *accelerationBuffer,
-                                  cl::Local(localWorkSize * sizeof(FP)), cl::Local(localWorkSize * sizeof(cl_fp3)),
-                                  settings.timeStep, settings.softeningLength, (int) mass.size());
+            calcNextPosition();
+            calcAcceleration(calcFirstAccelerationKernel);
             doneFirstStep = true;
             numSteps--;
         }
 
         for (unsigned step = 0; step < numSteps; ++step) {
-            calcNextPosition(eArgs,
-                             *positionBuffer, *velocityBuffer, *accelerationBuffer, settings.timeStep,
-                             (int) mass.size());
-            calcAcceleration(eArgs,
-                             *massBuffer, *positionBuffer, *velocityBuffer, *accelerationBuffer,
-                             cl::Local(localWorkSize * sizeof(FP)), cl::Local(localWorkSize * sizeof(cl_fp3)),
-                             settings.timeStep, settings.softeningLength, (int) mass.size());
+            calcNextPosition();
+            calcAcceleration(calcAccelerationKernel);
         }
     }
 
@@ -121,12 +83,23 @@ public:
     };
 
 private:
-    cl::Platform platform;
-    cl::Device device;
-    std::unique_ptr<cl::Context> context;
-    cl::Program::Sources sources;
-    cl::Program program;
-    std::unique_ptr<cl::CommandQueue> queue;
+    cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl_fp, int> calcNextPositionKernel;
+    typedef cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::LocalSpaceArg, cl::LocalSpaceArg, cl_fp, cl_fp, int> CalcAccKernelFunctor;
+    CalcAccKernelFunctor calcFirstAccelerationKernel;
+    CalcAccKernelFunctor calcAccelerationKernel;
+
+    inline void calcNextPosition() {
+        calcNextPositionKernel(*eArgs,
+                               *positionBuffer, *velocityBuffer, *accelerationBuffer, settings.timeStep,
+                               (int) mass.size());
+    }
+
+    inline void calcAcceleration(CalcAccKernelFunctor &calcAccKernel) {
+        calcAccKernel(*eArgs,
+                      *massBuffer, *positionBuffer, *velocityBuffer, *accelerationBuffer,
+                      cl::Local(localWorkSize * sizeof(FP)), cl::Local(localWorkSize * sizeof(cl_fp3)),
+                      settings.timeStep, settings.softeningLength, (int) mass.size());
+    }
 
     std::vector<FP> mass;
     std::vector<cl_fp3> position;
@@ -135,6 +108,7 @@ private:
 
     unsigned localWorkSize;
     unsigned globalWorkSize;
+    std::unique_ptr<cl::EnqueueArgs> eArgs;
 
     std::unique_ptr<cl::Buffer> massBuffer;
     std::unique_ptr<cl::Buffer> positionBuffer;
@@ -143,83 +117,25 @@ private:
 };
 
 template <typename FP>
-Universe<Algorithm::bruteForce, Platform::openCL, FP>::Universe(Settings settings) : UniverseBase{std::move(settings)} {
-
+Universe<Algorithm::bruteForce, Platform::openCL, FP>::Universe(Settings settings) :
+        UniverseBase{std::move(settings)},
+        OpenCLBase{[]() {
+            std::filesystem::path kernelFileName{__FILE__};
+            kernelFileName.replace_filename("UniverseKernel.cl");
+            std::ostringstream ss;
+            ss << "#define FP " << CLFloatTypeGet<FP>::fpName << "\n";
+            ss << "#define FP3 " << CLFloatTypeGet<FP>::fpName << "3" << "\n";
+            const cl::Program::Sources sources{ss.str() + OpenCLBase::getKernelSource(kernelFileName)};
+            return sources;
+        }()},
+        calcNextPositionKernel{program, std::string{"calcNextPosition"}},
+        calcFirstAccelerationKernel{program, std::string{"calcFirstVecAndAcc"}},
+        calcAccelerationKernel{program, std::string{"calcVecAndAcc"}} {
 }
 
 
 template <typename FP>
 void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr<BodyGenerator> bodyGenerator) {
-    const auto clDeviceType = CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_CPU;
-//    const auto clDeviceType = CL_DEVICE_TYPE_GPU;
-
-    // Pick an OpenCL platform that contains the requested device type.
-    // Then pick the first available device of the requested type.
-    std::vector<cl::Platform> allPlatforms;
-
-    cl::Platform::get(&allPlatforms);
-
-    if (allPlatforms.empty()) {
-        throw std::runtime_error{"No openCL platforms found."};
-    }
-
-    std::vector<cl::Device> allDevices;
-    for (const auto &p : allPlatforms) {
-        p.getDevices(clDeviceType, &allDevices);
-        if (!allDevices.empty()) {
-            platform = p;
-            break;
-        }
-    }
-
-    if (allDevices.empty()) {
-        throw std::runtime_error{"No openCL devices found."};
-    }
-    device = cl::Device(allDevices[0]);
-
-    /*
-    std::cout << "Using platform: " << platform.getInfo<CL_PLATFORM_NAME>() << "\n";
-    std::cout << "Using device: " << device.getInfo<CL_DEVICE_NAME>() << "\n";
-    auto printVector = [](const auto &vec) {
-        std::stringstream ss;
-        for (const auto &item : vec) ss << item << " ";
-        return ss.str();
-    };
-    std::cout << "Double supported: " << device.getInfo<CL_DEVICE_DOUBLE_FP_CONFIG>() << "\n";
-    std::cout << "Max work item sizes: " << printVector(device.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>()) << "\n";
-    std::cout << "Max work item dimensions: " << device.getInfo<CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS>() << "\n";
-    std::cout << "Max work group size: " << device.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>() << "\n";
-    */
-    context = std::make_unique<cl::Context>(device);
-
-
-    std::filesystem::path kernelFileName{__FILE__};
-    kernelFileName.replace_filename("UniverseKernel.cl");
-    if (std::ifstream kernelFile{kernelFileName}; kernelFile) {
-        std::ostringstream ss;
-        ss << "#define FP " << CLFloatTypeGet<FP>::fpName << "\n";
-        ss << "#define FP3 " << CLFloatTypeGet<FP>::fpName << "3" << "\n";
-        ss << kernelFile.rdbuf();
-        const std::string &str = ss.str();
-        //std::cout << "\n" << str << "\n";
-        sources.emplace_back(str.c_str(), str.size());
-    }
-    else {
-        throw std::runtime_error{"Could not read kernel in file " + kernelFileName.string()};
-    }
-
-    program = cl::Program{*context, sources};
-//    std::cout << "Building kernels...\n";
-    try {
-        program.build({device});
-    }
-    catch (cl::BuildError &e) {
-        std::cout << " Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device) << "\n";
-        std::cout << e.getBuildLog().size() << "\n";
-    }
-
-    queue = std::make_unique<cl::CommandQueue>(*context, device, CL_QUEUE_PROFILING_ENABLE);
-
     for (unsigned i = 0; i < settings.numberOfBodies; ++i) {
         auto[m, pos, vel] = bodyGenerator->getBody();
         mass.emplace_back(cl_fp(m));
@@ -243,7 +159,12 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
 
     localWorkSize = 64;
     globalWorkSize = (unsigned) (mass.size() / localWorkSize + 1) * localWorkSize;
-
+    eArgs = std::make_unique<cl::EnqueueArgs>(
+            *queue,
+            cl::NullRange,
+            cl::NDRange(globalWorkSize),
+            cl::NDRange(localWorkSize)
+    );
 //    std::cout << " - localWorkSize: " << localWorkSize << ", globalWorkSize: " << globalWorkSize << "\n";
 
 //    std::cout << "Size of mass values: " << massBuffer->getInfo<CL_MEM_SIZE>() << " bytes\n";

@@ -32,7 +32,7 @@ add_library(
         base/ConcreteUniverseInclude.hpp
         barnes-hut/cpu-single-thread/Universe.cpp
         barnes-hut/cpu-single-thread/Universe.hpp
-)
+        base/OpenCLBase.cpp base/OpenCLBase.hpp)
 target_compile_features(libcharon PUBLIC cxx_std_17)
 
 target_compile_options(
