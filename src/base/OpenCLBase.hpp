@@ -5,14 +5,21 @@
 #pragma once
 
 #include <CL/cl2.hpp>
-#include <memory>
 #include <filesystem>
+#include <memory>
+#include <vector>
 
 class OpenCLBase {
 public:
     explicit OpenCLBase(const cl::Program::Sources &sources);
 
     static std::string getKernelSource(const std::filesystem::path &filePath);
+
+    template <typename T>
+    std::unique_ptr<cl::Buffer> bufferFromVector(std::vector<T> &&vector, cl_mem_flags flags) {
+        return std::make_unique<cl::Buffer>(*context, flags | CL_MEM_COPY_HOST_PTR,
+                                            vector.size() * sizeof(T), vector.data());
+    }
 
 protected:
     cl::Platform platform;

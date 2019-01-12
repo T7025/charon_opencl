@@ -144,18 +144,10 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
         acceleration.emplace_back(cl_fp3{0, 0, 0});
     }
 
-
-    massBuffer = std::make_unique<cl::Buffer>(*context, CL_MEM_READ_ONLY | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                              mass.size() * sizeof(cl_fp), mass.data());
-    positionBuffer = std::make_unique<cl::Buffer>(*context,
-                                                  CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                                  position.size() * sizeof(cl_fp3), position.data());
-    velocityBuffer = std::make_unique<cl::Buffer>(*context,
-                                                  CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                                  velocity.size() * sizeof(cl_fp3), velocity.data());
-    accelerationBuffer = std::make_unique<cl::Buffer>(*context,
-                                                      CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                                      acceleration.size() * sizeof(cl_fp3), acceleration.data());
+    massBuffer = bufferFromVector(std::move(mass), CL_MEM_READ_ONLY | CL_MEM_HOST_READ_ONLY);
+    positionBuffer = bufferFromVector(std::move(position), CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY);
+    velocityBuffer = bufferFromVector(std::move(velocity), CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY);
+    accelerationBuffer = bufferFromVector(std::move(acceleration), CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY);
 
     localWorkSize = 64;
     globalWorkSize = (unsigned) (mass.size() / localWorkSize + 1) * localWorkSize;
