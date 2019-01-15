@@ -46,11 +46,12 @@ SCENARIO("Test the position update function", "[universe]") {
         };
 
         addSettings("algorithm", "brute-force", "barnes-hut");
-//        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
-        addSettings("platform", "cpu-single-thread");
+        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
+//        addSettings("platform", "cpu-single-thread");
 //        addSettings("platform", "opencl");
-//        addSettings("floatingPointType", "float", "double");
-        addSettings("floatingPointType", "double");
+        addSettings("floatingPointType", "float", "double");
+//        addSettings("floatingPointType", "double");
+        addSettings("barnesHutCutoff", 0.0);
         addSettings("rngSeed", 1302);
 
         WHEN("Computing the evolution of a trivial single body system") {
@@ -125,6 +126,15 @@ SCENARIO("Test the position update function", "[universe]") {
             baselineUniverse->step(numSteps);
             auto baselineResult = baselineUniverse->getInternalState();
 
+            auto sortResults = [](const auto &lhs, const auto &rhs) {
+                const auto &[mass1, pos1, vel1, acc1] = lhs;
+                const auto &[mass2, pos2, vel2, acc2] = rhs;
+                return pos1.x < pos2.x ||
+                       ((pos1.x == pos2.x && pos1.y < pos2.y) || (pos1.y == pos2.y && pos1.z < pos2.z));
+            };
+
+            std::sort(baselineResult.begin(), baselineResult.end(), sortResults);
+
             for (const auto &s : settings) {
                 std::unique_ptr<UniverseBase> universe;
                 try {
@@ -136,6 +146,8 @@ SCENARIO("Test the position update function", "[universe]") {
                 universe->init(std::make_unique<SphereBodyGenerator>(Settings{s}));
                 universe->step(numSteps);
                 auto result = universe->getInternalState();
+                std::sort(result.begin(), result.end(), sortResults);
+
                 for (unsigned i = 0; i < result.size(); ++i) {
                     const auto &[baselineMass, baselinePos, baselineVel, baselineAcc] = baselineResult[i];
                     const auto &[mass, pos, vel, acc] = result[i];

@@ -66,7 +66,7 @@ T rshift(T &&val, S &&shift) {
 template <typename FP>
 class Universe<Algorithm::barnesHut, Platform::cpuSingleThread, FP> : public UniverseBase {
 public:
-    explicit Universe(Settings settings) : UniverseBase{settings}, errorRate{settings.barnesHutCutoff} {};
+    explicit Universe(Settings settings) : UniverseBase{settings}, errorRate{(FP) settings.barnesHutCutoff} {};
     using UniverseBase::UniverseBase;
 
     void init(std::unique_ptr<BodyGenerator> bodyGenerator) override {
@@ -85,8 +85,6 @@ public:
         for (unsigned i = 0; i < numBodies; ++i) {
             out << tree[i].getMass() << " " << tree[i].getPosition() << " " << tree[i].getVelocity() << " "
                 << tree[i].getAcceleration() << "\n";
-            std::cout << tree[i].getMass() << " " << tree[i].getPosition() << " " << tree[i].getVelocity() << " "
-                      << tree[i].getAcceleration() << "\n";
         }
     }
 
@@ -173,11 +171,11 @@ public:
                 const auto res = (x * x + y * y + z * z) >= (r * r);
                 return res;
             };
-            auto isFarEnough2 = [&]() {
+            /*auto isFarEnough2 = [&]() {
                 auto radius = std::max(treeBoundingBox.x, std::max(treeBoundingBox.y, treeBoundingBox.z));
                 return radius * radius / curNode.getPosition().squareDistance(targetNode.getPosition()) <
                        errorRate * errorRate;
-            };
+            };*/
             if (curNode.isLeaf() && targetNode.getPosition() == curNode.getPosition()) {
                 continue;
             }

@@ -2,12 +2,13 @@
   "enableFileOutput": true,
   "resultsDir": "results",
   "resultsFilenamePrefix": "out_",
-  "algorithm": "brute-force",
-  "platform": "opencl",
-  "floatingPointType": "float",
-  "numberOfBodies": 10000,
+  "algorithm": "barnes-hut",
+  "barnesHutCutoff": 0.7,
+  "platform": "cpu-single-thread",
+  "floatingPointType": "double",
+  "numberOfBodies": 1000,
   "timeStep": 0.001,
   "snapshotDelta": 50,
-  "nrOfSteps": 25000,
+  "nrOfSteps": 2500,
   "softeningLength": 0.005
 }
