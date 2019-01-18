@@ -20,6 +20,8 @@ add_library(
         brute-force/cpu-multi-thread/Universe.hpp
         brute-force/opencl/Universe.cpp
         brute-force/opencl/Universe.hpp
+        brute-force/openclvec/Universe.cpp
+        brute-force/openclvec/Universe.hpp
         base/BodyGenerator.hpp
         BodyGenerators/SphereBodyGenerator.cpp
         BodyGenerators/SphereBodyGenerator.hpp
@@ -32,7 +34,13 @@ add_library(
         base/ConcreteUniverseInclude.hpp
         barnes-hut/cpu-single-thread/Universe.cpp
         barnes-hut/cpu-single-thread/Universe.hpp
-        base/OpenCLBase.cpp base/OpenCLBase.hpp barnes-hut/Node.cpp barnes-hut/Node.hpp barnes-hut/SFCIndex.cpp barnes-hut/SFCIndex.hpp)
+        base/OpenCLBase.cpp
+        base/OpenCLBase.hpp
+        barnes-hut/Node.cpp
+        barnes-hut/Node.hpp
+        barnes-hut/SFCIndex.cpp
+        barnes-hut/SFCIndex.hpp
+)
 target_compile_features(libcharon PUBLIC cxx_std_17)
 
 target_compile_options(

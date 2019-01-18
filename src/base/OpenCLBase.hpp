@@ -9,6 +9,22 @@
 #include <memory>
 #include <vector>
 
+template <typename FP> struct CLFloatTypeGet {};
+template <> struct CLFloatTypeGet<double> {
+    typedef double value_type;
+    typedef cl_double3 value_type3;
+    typedef cl_double4 cl_fp_vec;
+    static constexpr const char *fpName = "double";
+    static constexpr const char *fpVecName = "double4";
+};
+template <> struct CLFloatTypeGet<float> {
+    typedef float value_type;
+    typedef cl_float3 value_type3;
+    typedef cl_float4 cl_fp_vec;
+    static constexpr const char *fpName = "float";
+    static constexpr const char *fpVecName = "float4";
+};
+
 class OpenCLBase {
 public:
     explicit OpenCLBase(const cl::Program::Sources &sources);

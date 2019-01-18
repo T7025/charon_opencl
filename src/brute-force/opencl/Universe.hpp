@@ -16,19 +16,6 @@
 #include <sstream>
 #include <filesystem>
 
-
-template <typename FP> struct CLFloatTypeGet {};
-template <> struct CLFloatTypeGet<double> {
-    typedef double value_type;
-    typedef cl_double3 value_type3;
-    static constexpr const char *fpName = "double";
-};
-template <> struct CLFloatTypeGet<float> {
-    typedef float value_type;
-    typedef cl_float3 value_type3;
-    static constexpr const char *fpName = "float";
-};
-
 std::ostream &operator<<(std::ostream &out, const cl_double3 &val) {
     out << val.x << ' ' << val.y << ' ' << val.z;
     return out;

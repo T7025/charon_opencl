@@ -55,7 +55,8 @@ std::unique_ptr<UniverseBase> getConcreteUniverseImpl(const Settings &settings) 
     constexpr Entity<Platform> platformOptionsMap[] = {
             {"cpu-single-thread", Platform::cpuSingleThread},
             {"cpu-multi-thread",  Platform::cpuMultiThread},
-            {"opencl", Platform::openCL}
+            {"opencl",            Platform::openCL},
+            {"openclvec",         Platform::openCLVec},
     };
     constexpr auto fpTypeOptions = std::make_tuple(
             FPType<double>{"double"},

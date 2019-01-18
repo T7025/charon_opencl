@@ -40,6 +40,41 @@ void kernel calcNextPosition(
 }
 
 
+FP3 calcAccelerationNaive(
+        global const FP
+
+*mass,
+global const FP3
+*position,
+global FP3
+*velocity,
+global FP3
+*acceleration,
+local FP
+*localMass,
+local FP3
+*localPos,
+const FP timeStep,
+const FP softeningLength,
+const int numBodies
+) {
+const int gid = get_global_id(0);
+
+FP3 acc = (FP3)
+0;
+for (
+int j = 0;
+j<numBodies;
+++j) {
+const FP3 diff = position[j] - position[gid];
+const FP temp = rsqrt(dot(diff, diff) + softeningLength * softeningLength);
+acc +=
+diff *(FP3)(mass[j] * pown(temp, 3));
+}
+return
+acc;
+}
+
 FP3 calcAcceleration(
          global const FP *mass,
          global const FP3 *position,

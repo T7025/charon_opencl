@@ -8,4 +8,5 @@
 #include <brute-force/cpu-single-thread/Universe.hpp>
 #include <brute-force/cpu-multi-thread/Universe.hpp>
 #include <brute-force/opencl/Universe.hpp>
+#include <brute-force/openclvec/Universe.hpp>
 #include <barnes-hut/cpu-single-thread/Universe.hpp>
