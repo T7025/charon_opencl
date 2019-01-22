@@ -20,9 +20,9 @@ template <> struct CLFloatTypeGet<double> {
 template <> struct CLFloatTypeGet<float> {
     typedef float value_type;
     typedef cl_float3 value_type3;
-    typedef cl_float4 cl_fp_vec;
+    typedef cl_float2 cl_fp_vec;
     static constexpr const char *fpName = "float";
-    static constexpr const char *fpVecName = "float4";
+    static constexpr const char *fpVecName = "float2";
 };
 
 class OpenCLBase {

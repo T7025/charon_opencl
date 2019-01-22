@@ -144,12 +144,12 @@ template <typename FP>
 void Universe<Algorithm::bruteForce, Platform::openCLVec, FP>::init(std::unique_ptr<BodyGenerator> bodyGenerator) {
     for (unsigned i = 0; i < settings.numberOfBodies;) {
         cl_fp_vec tempMass{0};
-        cl_fp_vec tempXPosition;
-        cl_fp_vec tempYPosition;
-        cl_fp_vec tempZPosition;
-        cl_fp_vec tempXVelocity;
-        cl_fp_vec tempYVelocity;
-        cl_fp_vec tempZVelocity;
+        cl_fp_vec tempXPosition{0};
+        cl_fp_vec tempYPosition{0};
+        cl_fp_vec tempZPosition{0};
+        cl_fp_vec tempXVelocity{0};
+        cl_fp_vec tempYVelocity{0};
+        cl_fp_vec tempZVelocity{0};
         for (unsigned j = 0; j < vecSize && i < settings.numberOfBodies; ++j, ++i) {
             auto[m, pos, vel] = bodyGenerator->getBody();
             tempMass.s[j] = m;

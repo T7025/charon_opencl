@@ -30,12 +30,18 @@ void kernel calcNextStep(
                   const unsigned doneFirstAccCalc
 ) {
     const int gid = get_global_id(0);
-    if (gid >= numberOfBodies) {
+//    if (gid >= numberOfBodies) {
+    if (gid >= numberOfVec) {
         return;
     }
     const fp_vec globXPos = xPosition[gid];
     const fp_vec globYPos = yPosition[gid];
     const fp_vec globZPos = zPosition[gid];
+
+//    for (int i = 0; i < vecSize; ++i) {
+//        printf("%s %f, %f %f %f\n", i == 0 ? '-':'|', ((global FP *) &mass[gid])[i],
+//               ((const FP *) &globXPos)[i], ((const FP *) &globYPos)[i], ((const FP *) &globZPos)[i]);
+//    }
     if (doneFirstStep) {
 
         fp_vec xAcc = (fp_vec) 0;
@@ -45,27 +51,29 @@ void kernel calcNextStep(
             const fp_vec xDiff = xPosition[i] - globXPos;
             const fp_vec yDiff = yPosition[i] - globYPos;
             const fp_vec zDiff = zPosition[i] - globZPos;
-
+//            printf("%d, %d (nob: %d, nov: %d, vs: %d)\n(%f\t %f)\n(%f\t %f)\n(%f\t %f)\n", gid, i, numberOfBodies, numberOfVec, vecSize,
+//                    xDiff.s0, xDiff.s1, yDiff.s0, yDiff.s1, zDiff.s0, zDiff.s1);
             const fp_vec temp = mass[i] * pown(rsqrt(
                     xDiff * xDiff + yDiff * yDiff + zDiff * zDiff + softeningLength * softeningLength), 3);
             xAcc += xDiff * temp;
             yAcc += yDiff * temp;
             zAcc += zDiff * temp;
 
+        }
+        for (int i = 0; i < vecSize; ++i) {
             for (int j = 0; j < vecSize; ++j) {
-                for (int k = 0; k < vecSize; ++k) {
-                    const FP3 diff = {((const FP *) &globXPos)[k] - ((const FP *) &globXPos)[j],
-                                      ((const FP *) &globYPos)[k] - ((const FP *) &globYPos)[j],
-                                      ((const FP *) &globZPos)[k] - ((const FP *) &globZPos)[j]};
-                    const FP temp = rsqrt(dot(diff, diff) + softeningLength * softeningLength);
-                    const FP3 acc = diff * (FP3)(((global
-                    FP *)&mass[i])[k] *pown(temp, 3));
-                    ((FP * ) & xAcc)[j] += acc.x;
-                    ((FP * ) & yAcc)[j] += acc.y;
-                    ((FP * ) & zAcc)[j] += acc.z;
-                }
+                const FP3 diff = {((const FP *) &globXPos)[j] - ((const FP *) &globXPos)[i],
+                                  ((const FP *) &globYPos)[j] - ((const FP *) &globYPos)[i],
+                                  ((const FP *) &globZPos)[j] - ((const FP *) &globZPos)[i]};
+                const FP temp = rsqrt(dot(diff, diff) + softeningLength * softeningLength);
+                const FP3 acc = diff * (FP3)(((global FP *) &(mass[gid]))[j] *pown(temp, 3));
+//                    printf("%f,  %f %f %f\n", (((global FP *) &(mass[i]))[j]), acc.x, acc.y, acc.z);
+                ((FP * ) &xAcc)[i] += acc.x;
+                ((FP * ) &yAcc)[i] += acc.y;
+                ((FP * ) &zAcc)[i] += acc.z;
             }
         }
+//        printf()
 
         if (!doneFirstAccCalc) {
             const fp_vec timeStepVec = (fp_vec) timeStep;
