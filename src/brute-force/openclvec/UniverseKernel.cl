@@ -2,6 +2,8 @@
 //#define FP FP
 //#define FP3 FP3
 //#define fp_vec fp_vec
+//#define uint_s uint
+//#define uint_vec uint_vec
 
 // To format:
 // "\s(global|local|kernel)\s" -> "/*$1*/"
@@ -44,36 +46,45 @@ void kernel calcNextStep(
 //    }
     if (doneFirstStep) {
 
+        uint_vec shuffleMask;
+        for (int j = 0; j < vecSize; ++j) {
+            ((uint_s *) &shuffleMask)[j] = (j + 1) % vecSize;
+        }
+
         fp_vec xAcc = (fp_vec) 0;
         fp_vec yAcc = (fp_vec) 0;
         fp_vec zAcc = (fp_vec) 0;
         for (int i = 0; i < numberOfVec; ++i) {
-            const fp_vec xDiff = xPosition[i] - globXPos;
-            const fp_vec yDiff = yPosition[i] - globYPos;
-            const fp_vec zDiff = zPosition[i] - globZPos;
-//            printf("%d, %d (nob: %d, nov: %d, vs: %d)\n(%f\t %f)\n(%f\t %f)\n(%f\t %f)\n", gid, i, numberOfBodies, numberOfVec, vecSize,
-//                    xDiff.s0, xDiff.s1, yDiff.s0, yDiff.s1, zDiff.s0, zDiff.s1);
-            const fp_vec temp = mass[i] * pown(rsqrt(
-                    xDiff * xDiff + yDiff * yDiff + zDiff * zDiff + softeningLength * softeningLength), 3);
-            xAcc += xDiff * temp;
-            yAcc += yDiff * temp;
-            zAcc += zDiff * temp;
+
+            fp_vec m = mass[i];
+            fp_vec xPos = xPosition[i];
+            fp_vec yPos = yPosition[i];
+            fp_vec zPos = zPosition[i];
+
+            for (int j = 0; j < vecSize; ++j) {
+
+                const fp_vec xDiff = xPos - globXPos;
+                const fp_vec yDiff = yPos - globYPos;
+                const fp_vec zDiff = zPos - globZPos;
+    //            printf("%d, %d (nob: %d, nov: %d, vs: %d)\n(%f\t %f)\n(%f\t %f)\n(%f\t %f)\n", gid, i, numberOfBodies, numberOfVec, vecSize,
+    //                    xDiff.s0, xDiff.s1, yDiff.s0, yDiff.s1, zDiff.s0, zDiff.s1);
+                const fp_vec temp = m * pown(rsqrt(
+                        xDiff * xDiff + yDiff * yDiff + zDiff * zDiff + softeningLength * softeningLength), 3);
+                xAcc += xDiff * temp;
+                yAcc += yDiff * temp;
+                zAcc += zDiff * temp;
+//                printf("%d, %d\n%f\t %f\t %f\n%f\t %f\t %f\n -- %d, %d\n", gid, i,
+//                        (xDiff * temp).s0, (yDiff * temp).s0, (zDiff * temp).s0,
+//                        (xDiff * temp).s1, (yDiff * temp).s1, (zDiff * temp).s1, shuffleMask.s0, shuffleMask.s1);
+
+                m = shuffle(m, shuffleMask);
+                xPos = shuffle(xPos, shuffleMask);
+                yPos = shuffle(yPos, shuffleMask);
+                zPos = shuffle(zPos, shuffleMask);
+            }
 
         }
-        for (int i = 0; i < vecSize; ++i) {
-            for (int j = 0; j < vecSize; ++j) {
-                const FP3 diff = {((const FP *) &globXPos)[j] - ((const FP *) &globXPos)[i],
-                                  ((const FP *) &globYPos)[j] - ((const FP *) &globYPos)[i],
-                                  ((const FP *) &globZPos)[j] - ((const FP *) &globZPos)[i]};
-                const FP temp = rsqrt(dot(diff, diff) + softeningLength * softeningLength);
-                const FP3 acc = diff * (FP3)(((global FP *) &(mass[gid]))[j] *pown(temp, 3));
-//                    printf("%f,  %f %f %f\n", (((global FP *) &(mass[i]))[j]), acc.x, acc.y, acc.z);
-                ((FP * ) &xAcc)[i] += acc.x;
-                ((FP * ) &yAcc)[i] += acc.y;
-                ((FP * ) &zAcc)[i] += acc.z;
-            }
-        }
-//        printf()
+
 
         if (!doneFirstAccCalc) {
             const fp_vec timeStepVec = (fp_vec) timeStep;

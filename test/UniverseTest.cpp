@@ -46,14 +46,14 @@ SCENARIO("Test the position update function", "[universe]") {
         };
 
         addSettings("algorithm", "brute-force", "barnes-hut");
-        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclvec");
-//        addSettings("platform", "cpu-single-thread");
-//        addSettings("platform", "opencl");
+//        addSettings("algorithm", "brute-force");
+//        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclvec");
+        addSettings("platform", "openclvec");
 //        addSettings("floatingPointType", "float", "double");
         addSettings("floatingPointType", "float");
         addSettings("barnesHutCutoff", 0.0);
         addSettings("rngSeed", 1302);
-
+//        if (false)
         WHEN("Computing the evolution of a trivial single body system") {
             addSettings("numberOfBodies", 1);
             addSettings("timeStep", 1);
@@ -108,10 +108,10 @@ SCENARIO("Test the position update function", "[universe]") {
         }
 //        if (false)
         WHEN("Computing the evolution of a 128 body system") {
-            int numBodies = 4;
+            int numBodies = 128;
             double timeStep = 0.001;
-//            unsigned numSteps = 50;
-            unsigned numSteps = 1;
+//            unsigned numSteps = 2;
+            unsigned numSteps = 50;
 
             addSettings("numberOfBodies", numBodies);
             addSettings("timeStep", timeStep);
@@ -157,7 +157,8 @@ SCENARIO("Test the position update function", "[universe]") {
 //                    std::cout << baselineMass << ",\t" << baselinePos <<",\t" << baselineVel << ",\t" << baselineAcc << "\n";
 //                    std::cout << mass << ",\t" << pos <<",\t" << vel << ",\t" << acc << "\n\n";
                     REQUIRE(mass == Approx(baselineMass));
-                    REQUIRE(pos.norm() == Approx(baselinePos.norm()));
+//                    REQUIRE(pos.norm() == Approx(baselinePos.norm()));
+                    CHECK(pos.norm() == Approx(baselinePos.norm()));
                     CHECK(vel.norm() == Approx(baselineVel.norm()));
                     CHECK(acc.norm() == Approx(baselineAcc.norm()));
                 }

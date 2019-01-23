@@ -4,11 +4,11 @@
   "resultsFilenamePrefix": "out_",
   "algorithm": "brute-force",
   "barnesHutCutoff": 0.7,
-  "platform": "openclvec",
-  "floatingPointType": "double",
-  "numberOfBodies": 1000,
+  "platform": "opencl",
+  "floatingPointType": "float",
+  "numberOfBodies": 10000,
   "timeStep": 0.001,
   "snapshotDelta": 50,
-  "nrOfSteps": 2500,
+  "nrOfSteps": 200,
   "softeningLength": 0.005
 }

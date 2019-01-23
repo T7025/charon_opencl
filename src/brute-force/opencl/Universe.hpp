@@ -51,7 +51,7 @@ public:
         }
     }
 
-    void step(unsigned int numSteps) override {
+    /*void step(unsigned int numSteps) override {
         if (!doneFirstStep) {
             calcNextPosition();
             calcAcceleration(calcFirstAccelerationKernel);
@@ -63,13 +63,25 @@ public:
             calcNextPosition();
             calcAcceleration(calcAccelerationKernel);
         }
-    }
+    }*/
 
     void finish() override {
         queue->finish();
     };
 
 private:
+    void calcNextStep() override {
+        if (doneFirstStep) {
+            if (!doneFirstAccCalc) {
+                calcAcceleration(calcFirstAccelerationKernel);
+            } else {
+                calcAcceleration(calcAccelerationKernel);
+            }
+        }
+        calcNextPosition();
+    }
+
+
     cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl_fp, int> calcNextPositionKernel;
     typedef cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::LocalSpaceArg, cl::LocalSpaceArg, cl_fp, cl_fp, int> CalcAccKernelFunctor;
     CalcAccKernelFunctor calcFirstAccelerationKernel;

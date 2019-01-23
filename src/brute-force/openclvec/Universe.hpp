@@ -134,6 +134,8 @@ Universe<Algorithm::bruteForce, Platform::openCLVec, FP>::Universe(Settings sett
             ss << "#define FP " << CLFloatTypeGet<FP>::fpName << "\n";
             ss << "#define FP3 " << CLFloatTypeGet<FP>::fpName << "3" << "\n";
             ss << "#define fp_vec " << CLFloatTypeGet<FP>::fpVecName << "\n";
+            ss << "#define uint_s " << CLFloatTypeGet<FP>::uintName << "\n";
+            ss << "#define uint_vec " << CLFloatTypeGet<FP>::uintVecName << "\n";
             const cl::Program::Sources sources{ss.str() + OpenCLBase::getKernelSource(kernelFileName)};
             return sources;
         }()},

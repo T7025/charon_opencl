@@ -16,6 +16,8 @@ template <> struct CLFloatTypeGet<double> {
     typedef cl_double4 cl_fp_vec;
     static constexpr const char *fpName = "double";
     static constexpr const char *fpVecName = "double4";
+    static constexpr const char *uintName = "ulong";
+    static constexpr const char *uintVecName = "ulong4";
 };
 template <> struct CLFloatTypeGet<float> {
     typedef float value_type;
@@ -23,6 +25,8 @@ template <> struct CLFloatTypeGet<float> {
     typedef cl_float2 cl_fp_vec;
     static constexpr const char *fpName = "float";
     static constexpr const char *fpVecName = "float2";
+    static constexpr const char *uintName = "uint";
+    static constexpr const char *uintVecName = "uint2";
 };
 
 class OpenCLBase {

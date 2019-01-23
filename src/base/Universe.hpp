@@ -31,7 +31,13 @@ public:
      */
     std::vector<std::tuple<fp, Vec3<fp>, Vec3<fp>, Vec3<fp>>> getInternalState();
 
-    virtual void step(unsigned int numSteps) = 0;
+    virtual void step(unsigned int numSteps) {
+        for (unsigned step = 0; step < numSteps; ++step) {
+            calcNextStep();
+            doneFirstAccCalc = doneFirstStep;
+            doneFirstStep = true;
+        }
+    }
 
     /**
      * Useful for benchmarking OpenCL code.
@@ -39,8 +45,11 @@ public:
     virtual void finish() {};
 
 protected:
+    inline virtual void calcNextStep() = 0;
+
     Settings settings;
     bool doneFirstStep = false;
+    bool doneFirstAccCalc = false;
 };
 
 template <enum Algorithm algorithm, enum Platform platform, typename FP>

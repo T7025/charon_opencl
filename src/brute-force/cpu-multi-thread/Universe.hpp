@@ -37,7 +37,7 @@ public:
         }
     }
 
-    void step(unsigned int numSteps) override {
+    /*void step(unsigned int numSteps) override {
         if (!doneFirstStep) {
             calcNextPosition();
             for (unsigned i = 0; i < mass.size(); ++i) {
@@ -57,10 +57,29 @@ public:
                 acceleration[i] = newAcceleration;
             }
         }
-    }
+    }*/
 
 
 private:
+        void calcNextStep() override {
+        if (doneFirstStep) {
+            if (!doneFirstAccCalc) {
+                for (unsigned i = 0; i < mass.size(); ++i) {
+                    Vec3<FP> newAcceleration = calcAcceleration(i);
+                    velocity[i] += newAcceleration * settings.timeStep;
+                    acceleration[i] = newAcceleration;
+                }
+            } else {
+                for (unsigned i = 0; i < mass.size(); ++i) {
+                    Vec3<FP> newAcceleration = calcAcceleration(i);
+                    velocity[i] += (acceleration[i] + newAcceleration) * settings.timeStep / 2.0;
+                    acceleration[i] = newAcceleration;
+                }
+            }
+        }
+        calcNextPosition();
+    }
+
     void calcNextPosition() {
         #pragma omp parallel for
         for (unsigned i = 0; i < mass.size(); ++i) {
