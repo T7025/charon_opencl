@@ -68,12 +68,28 @@ void Simulator::run() {
 
     unsigned progressWait = 5;
     unsigned lastStep = 0;
+    unsigned timeBetweenUpdates = 0;
+    unsigned expectedTimeUntilUpdate = progressWait;
+    double lastTimeLeft = 0;
 
     auto printProgress = [&]() {
-        auto secLeft = unsigned(double((settings.nrOfSteps - *step) * progressWait) / (*step - lastStep));
+        unsigned secLeft;
+        if (lastStep == *step) {
+            timeBetweenUpdates += progressWait;
+        } else {
+            expectedTimeUntilUpdate = timeBetweenUpdates;
+            timeBetweenUpdates = progressWait;
+            lastTimeLeft = double(settings.nrOfSteps - *step) / (*step - lastStep);
+        }
+        secLeft = unsigned(lastTimeLeft * expectedTimeUntilUpdate) + progressWait - timeBetweenUpdates;
+
         std::cout << double(*step) * 100 / settings.nrOfSteps
-                  << "% done (" << *step << "/" << settings.nrOfSteps
-                  << "). About "<< secLeft / 60 << " min " << secLeft % 60 << " sec left.\n";
+                  << "% done (" << *step << "/" << settings.nrOfSteps;
+        if (*step) {
+            std::cout << "). About "<< secLeft / 60 << " min " << secLeft % 60 << " sec left.\n";
+        } else {
+            std::cout << "). About ? min ? sec left.\n";
+        }
         lastStep = *step;
     };
 
