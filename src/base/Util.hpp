@@ -19,6 +19,7 @@ enum class Platform {
     cpuSingleThread,
     cpuMultiThread,
     openCL,
+    openCLLoc,
     openCLVec,
 };
 

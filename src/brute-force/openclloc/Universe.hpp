@@ -16,8 +16,9 @@
 #include <sstream>
 #include <filesystem>
 
+
 template <typename FP>
-class Universe<Algorithm::bruteForce, Platform::openCL, FP> : public UniverseBase, public OpenCLBase {
+class Universe<Algorithm::bruteForce, Platform::openCLLoc, FP> : public UniverseBase, public OpenCLBase {
 public:
     typedef typename CLFloatTypeGet<FP>::value_type3 cl_fp3;
     typedef typename CLFloatTypeGet<FP>::value_type cl_fp;
@@ -28,7 +29,9 @@ public:
 
 
     void logInternalState(std::ostream &out) override {
-        assert(mass.size() == position.size() && mass.size() == velocity.size() && mass.size() == acceleration.size());
+        assert(settings.numberOfBodies == position.size()
+               && settings.numberOfBodies == velocity.size()
+               && settings.numberOfBodies == acceleration.size());
 
         cl::copy(*queue, *positionBuffer, position.begin(), position.end());
         cl::copy(*queue, *velocityBuffer, velocity.begin(), velocity.end());
@@ -36,7 +39,7 @@ public:
         queue->flush();
 
         out << "mass xPos yPos zPos xVel yVel zVel xAcc yAcc zAcc\n";
-        for (unsigned i = 0; i < mass.size(); ++i) {
+        for (unsigned i = 0; i < settings.numberOfBodies; ++i) {
             out << mass[i] << ' ' << position[i] << ' ' << velocity[i] << ' ' << acceleration[i] << '\n';
         }
     }
@@ -50,7 +53,8 @@ private:
         if (doneFirstStep) {
             if (!doneFirstAccCalc) {
                 calcAcceleration(calcFirstAccelerationKernel);
-            } else {
+            }
+            else {
                 calcAcceleration(calcAccelerationKernel);
             }
         }
@@ -58,21 +62,25 @@ private:
     }
 
 
-    cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl_fp, int> calcNextPositionKernel;
-    typedef cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl_fp, cl_fp, int> CalcAccKernelFunctor;
+    cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl_fp, cl_fp, int> calcNextPositionKernel;
+    typedef cl::KernelFunctor<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,
+//    cl::LocalSpaceArg,
+    cl::LocalSpaceArg, cl_fp, cl_fp, int> CalcAccKernelFunctor;
     CalcAccKernelFunctor calcFirstAccelerationKernel;
     CalcAccKernelFunctor calcAccelerationKernel;
 
     inline void calcNextPosition() {
         calcNextPositionKernel(*eArgs,
-                               *positionBuffer, *velocityBuffer, *accelerationBuffer, settings.timeStep,
-                               (int) mass.size());
+                               *positionBuffer, *velocityBuffer, *accelerationBuffer, settings.timeStep, settings.timeStep * settings.timeStep * 0.5,
+                               (int) settings.numberOfBodies);
     }
 
     inline void calcAcceleration(CalcAccKernelFunctor &calcAccKernel) {
         calcAccKernel(*eArgs,
                       *massBuffer, *positionBuffer, *velocityBuffer, *accelerationBuffer,
-                      settings.timeStep, settings.softeningLength, (int) mass.size());
+//                      cl::Local(localWorkSize * sizeof(FP)),
+                      cl::Local(localWorkSize * sizeof(cl_fp3)),
+                      settings.timeStep, settings.softeningLength, (int) settings.numberOfBodies);
     }
 
     std::vector<FP> mass;
@@ -91,7 +99,7 @@ private:
 };
 
 template <typename FP>
-Universe<Algorithm::bruteForce, Platform::openCL, FP>::Universe(Settings settings) :
+Universe<Algorithm::bruteForce, Platform::openCLLoc, FP>::Universe(Settings settings) :
         UniverseBase{std::move(settings)},
         OpenCLBase{[]() {
             std::filesystem::path kernelFileName{__FILE__};
@@ -109,12 +117,27 @@ Universe<Algorithm::bruteForce, Platform::openCL, FP>::Universe(Settings setting
 
 
 template <typename FP>
-void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr<BodyGenerator> bodyGenerator) {
+void Universe<Algorithm::bruteForce, Platform::openCLLoc, FP>::init(std::unique_ptr<BodyGenerator> bodyGenerator) {
+    localWorkSize = 64;
+    globalWorkSize = (unsigned) (settings.numberOfBodies / localWorkSize + 1) * localWorkSize;
+    eArgs = std::make_unique<cl::EnqueueArgs>(
+            *queue,
+            cl::NullRange,
+            cl::NDRange(globalWorkSize),
+            cl::NDRange(localWorkSize)
+    );
+
     for (unsigned i = 0; i < settings.numberOfBodies; ++i) {
         auto[m, pos, vel] = bodyGenerator->getBody();
         mass.emplace_back(cl_fp(m));
         position.emplace_back(cl_fp3{cl_fp(pos.x), cl_fp(pos.y), cl_fp(pos.z)});
         velocity.emplace_back(cl_fp3{cl_fp(vel.x), cl_fp(vel.y), cl_fp(vel.z)});
+        acceleration.emplace_back(cl_fp3{0, 0, 0});
+    }
+    for (unsigned i = settings.numberOfBodies; i < globalWorkSize; ++i) {
+        mass.emplace_back(cl_fp(0));
+        position.emplace_back(cl_fp3{0, 0, 0});
+        velocity.emplace_back(cl_fp3{0, 0, 0});
         acceleration.emplace_back(cl_fp3{0, 0, 0});
     }
 
@@ -123,14 +146,6 @@ void Universe<Algorithm::bruteForce, Platform::openCL, FP>::init(std::unique_ptr
     velocityBuffer = bufferFromVector(std::move(velocity), CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY);
     accelerationBuffer = bufferFromVector(std::move(acceleration), CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY);
 
-    localWorkSize = 64;
-    globalWorkSize = (unsigned) (mass.size() / localWorkSize + 1) * localWorkSize;
-    eArgs = std::make_unique<cl::EnqueueArgs>(
-            *queue,
-            cl::NullRange,
-            cl::NDRange(globalWorkSize),
-            cl::NDRange(localWorkSize)
-    );
 //    std::cout << " - localWorkSize: " << localWorkSize << ", globalWorkSize: " << globalWorkSize << "\n";
 
 //    std::cout << "Size of mass values: " << massBuffer->getInfo<CL_MEM_SIZE>() << " bytes\n";

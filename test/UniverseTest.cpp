@@ -45,12 +45,12 @@ SCENARIO("Test the position update function", "[universe]") {
             addSettingsImpl(addSettingsImpl, size, name, values...);
         };
 
-        addSettings("algorithm", "brute-force", "barnes-hut");
-//        addSettings("algorithm", "brute-force");
-//        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclvec");
-        addSettings("platform", "openclvec");
-//        addSettings("floatingPointType", "float", "double");
-        addSettings("floatingPointType", "float");
+//        addSettings("algorithm", "brute-force", "barnes-hut");
+        addSettings("algorithm", "brute-force");
+        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclloc", "openclvec");
+//        addSettings("platform", "openclvec");
+        addSettings("floatingPointType", "float", "double");
+//        addSettings("floatingPointType", "float");
         addSettings("barnesHutCutoff", 0.0);
         addSettings("rngSeed", 1302);
 //        if (false)

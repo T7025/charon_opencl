@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <memory>
 #include <vector>
+#include <settings/Settings.hpp>
 
 template <typename FP> struct CLFloatTypeGet {};
 template <> struct CLFloatTypeGet<double> {
@@ -31,7 +32,7 @@ template <> struct CLFloatTypeGet<float> {
 
 class OpenCLBase {
 public:
-    explicit OpenCLBase(const cl::Program::Sources &sources);
+    explicit OpenCLBase(const cl::Program::Sources &sources, const Settings &settings);
 
     static std::string getKernelSource(const std::filesystem::path &filePath);
 
@@ -49,3 +50,7 @@ protected:
     std::unique_ptr<cl::CommandQueue> queue;
 };
 
+
+std::ostream &operator<<(std::ostream &out, const cl_double3 &val);
+
+std::ostream &operator<<(std::ostream &out, const cl_float3 &val);

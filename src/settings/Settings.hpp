@@ -44,4 +44,6 @@ public:
     /// v^2 >> G*m/e
     const fp softeningLength;
 
+    const int numThreads;  ///< Number of OpenMP threads allowed.
+    const std::string openclCompileOpts;  ///< OpenCL compile options.
 };

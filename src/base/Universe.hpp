@@ -45,7 +45,7 @@ public:
     virtual void finish() {};
 
 protected:
-    inline virtual void calcNextStep() = 0;
+    virtual void calcNextStep() = 0;
 
     Settings settings;
     bool doneFirstStep = false;

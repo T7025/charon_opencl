@@ -56,6 +56,7 @@ std::unique_ptr<UniverseBase> getConcreteUniverseImpl(const Settings &settings) 
             {"cpu-single-thread", Platform::cpuSingleThread},
             {"cpu-multi-thread",  Platform::cpuMultiThread},
             {"opencl",            Platform::openCL},
+            {"openclloc",         Platform::openCLLoc},
             {"openclvec",         Platform::openCLVec},
     };
     constexpr auto fpTypeOptions = std::make_tuple(

@@ -20,6 +20,8 @@ add_library(
         brute-force/cpu-multi-thread/Universe.hpp
         brute-force/opencl/Universe.cpp
         brute-force/opencl/Universe.hpp
+        brute-force/openclloc/Universe.cpp
+        brute-force/openclloc/Universe.hpp
         brute-force/openclvec/Universe.cpp
         brute-force/openclvec/Universe.hpp
         base/BodyGenerator.hpp

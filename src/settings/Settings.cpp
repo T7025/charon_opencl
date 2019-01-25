@@ -27,7 +27,9 @@ Settings::Settings(const nlohmann::json &json) :
         universeRadius{json.value("universeRadius", fp(1.0))},
         totalMass{1.0},
         G{1.0},
-        softeningLength{json.value("softeningLength", fp(0.005))} {}
+        softeningLength{json.value("softeningLength", fp(0.005))},
+        numThreads{json.value("numThreads", 0)},
+        openclCompileOpts{json.value("openclCompileOpts", "")} {}
 
 
 Settings::Settings(const std::string &settingsFilePrefix, const std::string &settingsFile) :

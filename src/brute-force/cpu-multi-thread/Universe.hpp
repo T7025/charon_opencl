@@ -10,12 +10,15 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+#include <omp.h>
 
 
 template<typename FP>
 class Universe<Algorithm::bruteForce, Platform::cpuMultiThread, FP> : public UniverseBase {
 public:
-    explicit Universe(Settings settings) : UniverseBase{std::move(settings)} {};
+    explicit Universe(Settings settings) : UniverseBase{std::move(settings)} {
+        omp_set_num_threads(this->settings.numThreads > 0 ? this->settings.numThreads : omp_get_max_threads());
+    };
 
     void init(std::unique_ptr<BodyGenerator> bodyGenerator) override {
         for (unsigned i = 0; i < settings.numberOfBodies; ++i) {

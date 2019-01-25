@@ -7,7 +7,7 @@
 #include <fstream>
 #include "OpenCLBase.hpp"
 
-OpenCLBase::OpenCLBase(const cl::Program::Sources &sources) {
+OpenCLBase::OpenCLBase(const cl::Program::Sources &sources, const Settings &settings) {
     const auto clDeviceType = CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_CPU;
 //    const auto clDeviceType = CL_DEVICE_TYPE_GPU;
 
@@ -53,7 +53,7 @@ OpenCLBase::OpenCLBase(const cl::Program::Sources &sources) {
     program = cl::Program{*context, sources};
     //std::cout << "Building kernels...\n";
     try {
-        program.build({device});
+        program.build({device}, settings.openclCompileOpts.c_str());
     }
     catch (cl::BuildError &e) {
         std::cout << " Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device) << "\n";
@@ -72,4 +72,14 @@ std::string OpenCLBase::getKernelSource(const std::filesystem::path &filePath) {
     else {
         throw std::runtime_error{"Could not read kernel in file " + filePath.string()};
     }
+}
+
+std::ostream &operator<<(std::ostream &out, const cl_double3 &val) {
+    out << val.x << ' ' << val.y << ' ' << val.z;
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const cl_float3 &val) {
+    out << val.x << ' ' << val.y << ' ' << val.z;
+    return out;
 }

@@ -138,7 +138,7 @@ Universe<Algorithm::bruteForce, Platform::openCLVec, FP>::Universe(Settings sett
             ss << "#define uint_vec " << CLFloatTypeGet<FP>::uintVecName << "\n";
             const cl::Program::Sources sources{ss.str() + OpenCLBase::getKernelSource(kernelFileName)};
             return sources;
-        }()},
+        }(), this->settings},
         calcNextStepKernel{program, std::string{"calcNextStep"}} {}
 
 
