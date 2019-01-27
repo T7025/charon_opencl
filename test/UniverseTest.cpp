@@ -46,7 +46,7 @@ SCENARIO("Test the position update function", "[universe]") {
         };
 
 //        addSettings("algorithm", "brute-force", "barnes-hut");
-        addSettings("algorithm", "brute-force");
+        addSettings("algorithm", "barnes-hut");
         addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclloc", "openclvec");
 //        addSettings("platform", "openclvec");
         addSettings("floatingPointType", "float", "double");
@@ -111,7 +111,7 @@ SCENARIO("Test the position update function", "[universe]") {
             int numBodies = 128;
             double timeStep = 0.001;
 //            unsigned numSteps = 2;
-            unsigned numSteps = 50;
+            unsigned numSteps = 2;
 
             addSettings("numberOfBodies", numBodies);
             addSettings("timeStep", timeStep);

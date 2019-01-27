@@ -66,47 +66,19 @@ T rshift(T &&val, S &&shift) {
 template <typename FP>
 class Universe<Algorithm::barnesHut, Platform::cpuSingleThread, FP> : public UniverseBase {
 public:
-    explicit Universe(Settings settings) : UniverseBase{settings}, errorRate{(FP) settings.barnesHutCutoff} {};
-    using UniverseBase::UniverseBase;
+    explicit Universe(Settings settings);
 
-    void init(std::unique_ptr<BodyGenerator> bodyGenerator) override {
-        for (unsigned i = 0; i < settings.numberOfBodies; ++i) {
-            auto[m, pos, vel] = bodyGenerator->getBody();
-            tree.emplace_back(Vec3<FP>{pos}, Vec3<FP>{vel}, Vec3<FP>{0, 0, 0}, (FP) m);
-        }
-        numBodies = (unsigned) tree.size();
-        tree.reserve(4 * numBodies - 3);
-    }
+    void init(std::unique_ptr<BodyGenerator> bodyGenerator) override;
 
-    void logInternalState(std::ostream &out) override {
-        assert(!treeIsBuilt);
+    void logInternalState(std::ostream &out) override;
 
-        out << "mass xPos yPos zPos xVel yVel zVel xAcc yAcc zAcc\n";
-        for (unsigned i = 0; i < numBodies; ++i) {
-            out << tree[i].getMass() << " " << tree[i].getPosition() << " " << tree[i].getVelocity() << " "
-                << tree[i].getAcceleration() << "\n";
-        }
-    }
+private:
+    void calcNextStep() override;
 
-    void step(unsigned int numSteps) override {
-        if (!doneFirstStep) {
-            calcNextPosition();
-            calculateFirstAcc();
-            doneFirstStep = true;
-            numSteps--;
-        }
 
-        for (unsigned step = 0; step < numSteps; ++step) {
-            calcNextPosition();
-            calculateNextAcc();
-        }
-    }
-
-    void calculateFirstAcc() {
-//        calcNextPosition();
+    void calculateFirstAcc(); /* {
 
         buildTree();
-//    std::cout <<*this<<"\n";
         for (unsigned i = 0; i < tree.size(); ++i) {
             if (tree[i].isLeaf()) {
                 Vec3<FP> newAcceleration = calculateAcceleration(tree[i]);
@@ -114,13 +86,11 @@ public:
                 tree[i].getAcceleration() = newAcceleration;
             }
         }
-
         flattenTree();
-
-//        calcNextPosition();
     }
 
-    void calculateNextAcc() {
+    */
+    void calculateNextAcc(); /* {
 //    auto start = omp_get_wtime();
         buildTree();
 //    std::cout << *this <<"\n";
@@ -136,7 +106,8 @@ public:
 //        calcNextPosition();
     }
 
-    void calcNextPosition() {
+    */
+    void calcNextPosition(); /* {
         assert(!treeIsBuilt);
 
         const auto size = numBodies;
@@ -147,8 +118,8 @@ public:
             pos += vel * settings.timeStep + acc * (settings.timeStep * settings.timeStep / 2);
         }
     }
-
-    Vec3<FP> calculateAcceleration(const Node<FP> &targetNode) const {
+    */
+    Vec3<FP> calculateAcceleration(const Node<FP> &targetNode) const;/* {
         Vec3<FP> result = {0, 0, 0};
 
         std::vector<unsigned> stack;
@@ -171,11 +142,11 @@ public:
                 const auto res = (x * x + y * y + z * z) >= (r * r);
                 return res;
             };
-            /*auto isFarEnough2 = [&]() {
-                auto radius = std::max(treeBoundingBox.x, std::max(treeBoundingBox.y, treeBoundingBox.z));
-                return radius * radius / curNode.getPosition().squareDistance(targetNode.getPosition()) <
-                       errorRate * errorRate;
-            };*/
+//            auto isFarEnough2 = [&]() {
+//                auto radius = std::max(treeBoundingBox.x, std::max(treeBoundingBox.y, treeBoundingBox.z));
+//                return radius * radius / curNode.getPosition().squareDistance(targetNode.getPosition()) <
+//                       errorRate * errorRate;
+//            };
             if (curNode.isLeaf() && targetNode.getPosition() == curNode.getPosition()) {
                 continue;
             }
@@ -199,7 +170,8 @@ public:
         return result;
     }
 
-    void flattenTree() {
+    */
+    void flattenTree(); /* {
         assert(treeIsBuilt);
         std::sort(tree.begin(), tree.end(),
                   [](const Node<FP> &lhs, const Node<FP> &rhs) { return lhs.getDepth() > rhs.getDepth(); });
@@ -207,7 +179,8 @@ public:
         treeIsBuilt = false;
     }
 
-    void buildTree() {
+    */
+    void buildTree(); /* {
 //    std::cout << *this <<"\n";
 
         scalePositions();
@@ -240,11 +213,13 @@ public:
         treeIsBuilt = true;
     }
 
-    void sortTree() {
+    */
+    void sortTree(); /* {
         std::sort(tree.begin(), tree.end());
     }
 
-    void scalePositions() {
+    */
+    void scalePositions(); /* {
         Vec3<FP> min = {
                 std::numeric_limits<FP>::infinity(),
                 std::numeric_limits<FP>::infinity(),
@@ -272,7 +247,8 @@ public:
         treeBoundingBox.z = std::max(treeBoundingBox.z, std::numeric_limits<FP>::min());
     }
 
-    void calcSFCIndices() {
+    */
+    void calcSFCIndices(); /* {
         const FP mult = std::pow(2, k);
         for (unsigned i = 0; i < tree.size(); ++i) {
             const auto pos = tree[i].getPosition() - offset;
@@ -282,7 +258,8 @@ public:
         }
     }
 
-    void generateInternalNodes() {
+    */
+    void generateInternalNodes(); /* {
         sortTree();
 
         auto treeSize = tree.size();
@@ -309,12 +286,14 @@ public:
         }
     }
 
-    void removeDuplicateInternalNodes() {
+    */
+    void removeDuplicateInternalNodes(); /* {
         sortTree();
         tree.erase(std::unique(tree.begin(), tree.end()), tree.end());
     }
 
-    void establishParentChildRel() {
+    */
+    void establishParentChildRel(); /* {
         auto treeSize = tree.size();
 
         tree.resize(2 * treeSize - 1);
@@ -371,7 +350,8 @@ public:
 //    std::cout << *this <<"\n";
     }
 
-    void calculateNodeData() {
+    */
+    void calculateNodeData(); /* {
         for (unsigned i = 0; i < tree.size(); ++i) {
             if (tree[i].getDepth() != k) {
                 FP mass = 0;
@@ -392,7 +372,7 @@ public:
             }
         }
     }
-
+*/
 
 private:
     std::vector<Node<FP>> tree;
@@ -405,6 +385,19 @@ private:
 };
 
 template <typename FP>
+std::ostream &operator<<(std::ostream &out, const std::vector<Node<FP>> &tree) {
+    std::string tabSpace = "'";
+    for (const auto &node : tree) {
+        std::string tab;
+        for (unsigned i = 0; i < node.getDepth(); ++i) {
+            tab += tabSpace;
+        }
+        out << tab << node << "\n";
+    }
+    return out;
+}
+
+/*template <typename FP>
 std::ostream &operator<<(std::ostream &out, const Universe<Algorithm::barnesHut, Platform::cpuSingleThread, FP> &tree) {
     std::string tabSpace = "'";
     for (const auto &node : tree.tree) {
@@ -415,4 +408,4 @@ std::ostream &operator<<(std::ostream &out, const Universe<Algorithm::barnesHut,
         out << tab << node << "\n";
     }
     return out;
-}
+}*/

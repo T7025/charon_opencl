@@ -42,7 +42,7 @@ add_library(
         barnes-hut/Node.hpp
         barnes-hut/SFCIndex.cpp
         barnes-hut/SFCIndex.hpp
-)
+        barnes-hut/opencl/Universe.cpp barnes-hut/opencl/Universe.hpp)
 target_compile_features(libcharon PUBLIC cxx_std_17)
 
 target_compile_options(
@@ -82,3 +82,5 @@ message("-- Charon compile definitions: ${charon_compile_definitions}")
 
 get_target_property(charon_link_libraries libcharon LINK_LIBRARIES)
 message("-- Charon link libraries: ${charon_link_libraries}")
+
+add_executable(testSFCGen barnes-hut/testSFCGen.cpp barnes-hut/SFCIndex.cpp barnes-hut/SFCIndex.hpp)
