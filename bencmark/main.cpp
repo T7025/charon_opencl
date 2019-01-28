@@ -77,12 +77,16 @@ std::vector<nlohmann::json> getSettings() {
         addSettingsImpl(addSettingsImpl, size, name, values...);
     };
 
-    addSettings("algorithm", "brute-force", "barnes-hut");
+    addSettings("algorithm", "brute-force");//, "barnes-hut");
     addSettings("floatingPointType", "float", "double");
-//    addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl");
-    addSettings("platform", "opencl");
+    addSettings("numThreads", 6);
+    addSettings("openclCompileOpts", "-cl-fast-relaxed-math");
+//    addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclloc", "openclvec");
+    addSettings("platform", "opencl", "openclloc", "openclvec");
+    addSettings("timeStep", 0.001);
+    addSettings("softeningLength", 0.005);
     addSettings("barnesHutCutoff", 0.7);
-    addSettings("numberOfBodies", 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144);
+    addSettings("numberOfBodies", /*128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768,*/ 65536, 131072, 262144);
 
     return settings;
 }
@@ -103,7 +107,7 @@ int main() {
     NS ns = typename steady_clock::duration(1);
     std::cout << "Time resolution: " << ns.count() << "ns\n";
 
-    omp_set_num_threads(6);
+    //omp_set_num_threads(6);
     // Create standard json settings (with lib)
     // For each implementation: run with same settings
     // Put results in timestamped files/folders
@@ -117,7 +121,6 @@ int main() {
     auto settings = getSettings();
     for (const auto &s : settings) {
         Settings setting{s};
-
         auto beforeInit = steady_clock::now();
         std::unique_ptr<UniverseBase> universe;
         try {
@@ -134,31 +137,32 @@ int main() {
         universe->finish();
         auto afterSingleStep = steady_clock::now();
         duration<double> expectedStepTime = afterSingleStep - beforeSingleStep;
-
         duration<double> requestedDuration = 5s;
         int minNumIterations = 10;
 
         int requestedNumIterations = (int) std::max(std::round(requestedDuration.count() / expectedStepTime.count()),
                                                     (double) minNumIterations);
+        requestedNumIterations = (int) std::min((double)requestedNumIterations, 1000.0);
 
+        std::cout << "Settings: " << s << "\n";
+        std::cout << "Expected step time: " << expectedStepTime.count() << "s\n";
+        std::cout << "Requested # iterations: " << requestedNumIterations << "\n";
         auto beforeSteps = steady_clock::now();
         int numIterations = 0;
         while (numIterations < requestedNumIterations && (numIterations < minNumIterations || duration_cast<seconds>(
                 steady_clock::now() - beforeSteps).count() < 10)) {
             universe->step(1);
+            universe->finish();
             ++numIterations;
 //            if (numIterations > requestedNumIterations || (numIterations > minNumIterations && duration_cast<seconds>(
 //                    steady_clock::now() - beforeSteps).count() > 10))
         }
-        universe->finish();
         auto afterSteps = steady_clock::now();
 
         auto initDuration = duration_cast<nanoseconds>(afterInit - beforeInit);
         auto stepDuration = duration_cast<nanoseconds>(afterSteps - beforeSteps) / numIterations;
         auto totalDuration = initDuration + (afterSteps - beforeSteps);
 
-        std::cout << "Settings: " << s << "\n";
-        std::cout << "Requested # iterations: " << requestedNumIterations << "\n";
         std::cout << "Total benchmark duration: " << duration<double>(totalDuration).count() << "s\n";
         std::cout << "Init duration: " << duration<double>(initDuration).count() << "s\n";
         std::cout << "Average step duration after " << numIterations << " steps: " << stepDuration.count()

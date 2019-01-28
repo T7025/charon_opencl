@@ -32,11 +32,11 @@ if (NOT nlohmann_json_POPULATED)
     add_subdirectory(${nlohmann_json_SOURCE_DIR} ${nlohmann_json_BINARY_DIR})
 endif ()
 
-FetchContent_Declare(
-        boost_compute
-        GIT_REPOSITORY https://github.com/boostorg/compute.git
-        GIT_TAG boost-1.69.0
-)
+#FetchContent_Declare(
+#        boost_compute
+#        GIT_REPOSITORY https://github.com/boostorg/compute.git
+#        GIT_TAG boost-1.69.0
+#)
 #FetchContent_GetProperties(boost_compute)
 #if (NOT boost_compute_POPULATED)
 #    FetchContent_Populate(boost_compute)

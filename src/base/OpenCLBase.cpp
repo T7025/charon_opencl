@@ -53,7 +53,7 @@ OpenCLBase::OpenCLBase(const cl::Program::Sources &sources, const Settings &sett
     program = cl::Program{*context, sources};
     //std::cout << "Building kernels...\n";
     try {
-        program.build({device}, (settings.openclCompileOpts + ";" + compileOpts).c_str());
+        program.build({device}, (settings.openclCompileOpts + (compileOpts.empty() ? "":";") + compileOpts).c_str());
     }
     catch (cl::BuildError &e) {
         std::cout << " Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device) << "\n";

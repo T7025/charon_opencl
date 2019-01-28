@@ -137,10 +137,6 @@ private:
     } data;
 };
 
-struct Node2 {
-
-};
-
 template <typename FP>
 std::ostream &operator<<(std::ostream &out, const Node<FP> &node) {
     out << node.getSFCIndex() << "; " << node.getDepth() << "; " << node.getMass() << "; " << node.getPosition();

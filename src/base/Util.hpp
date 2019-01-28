@@ -22,7 +22,3 @@ enum class Platform {
     openCLLoc,
     openCLVec,
 };
-
-
-
-

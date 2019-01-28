@@ -29,13 +29,13 @@ public:
 
 
     void logInternalState(std::ostream &out) override {
-        assert(settings.numberOfBodies == position.size()
-               && settings.numberOfBodies == velocity.size()
-               && settings.numberOfBodies == acceleration.size());
-
-        cl::copy(*queue, *positionBuffer, position.begin(), position.end());
-        cl::copy(*queue, *velocityBuffer, velocity.begin(), velocity.end());
-        cl::copy(*queue, *accelerationBuffer, acceleration.begin(), acceleration.end());
+//        assert(settings.numberOfBodies == position.size()
+//               && settings.numberOfBodies == velocity.size()
+//               && settings.numberOfBodies == acceleration.size());
+//
+        cl::copy(*queue, *positionBuffer, position.begin(), position.begin() + settings.numberOfBodies);
+        cl::copy(*queue, *velocityBuffer, velocity.begin(), velocity.begin() + settings.numberOfBodies);
+        cl::copy(*queue, *accelerationBuffer, acceleration.begin(), acceleration.begin() + settings.numberOfBodies);
         queue->flush();
 
         out << "mass xPos yPos zPos xVel yVel zVel xAcc yAcc zAcc\n";

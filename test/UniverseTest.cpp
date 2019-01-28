@@ -45,10 +45,11 @@ SCENARIO("Test the position update function", "[universe]") {
             addSettingsImpl(addSettingsImpl, size, name, values...);
         };
 
-        addSettings("algorithm", "brute-force", "barnes-hut");
+//        addSettings("algorithm", "brute-force", "barnes-hut");
+        addSettings("algorithm", "brute-force");
 //        addSettings("algorithm", "barnes-hut");
         addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclloc", "openclvec");
-//        addSettings("platform", "openclvec");
+//        addSettings("platform", "cpu-single-thread");
         addSettings("floatingPointType", "float", "double");
 //        addSettings("floatingPointType", "float");
         addSettings("barnesHutCutoff", 0.0);

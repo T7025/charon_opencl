@@ -69,7 +69,7 @@ void UniverseImpl<FP>::calculateNextAcc() {
     buildTree();
 
 
-    std::vector<unsigned> bodyIDs;
+    /*std::vector<unsigned> bodyIDs;
     bodyIDs.reserve(numBodies);
     for (unsigned i = 0; i < tree.size(); ++i) {
         if (tree[i].isLeaf()) {
@@ -77,7 +77,7 @@ void UniverseImpl<FP>::calculateNextAcc() {
             std::cout << i << ",";
         }
     }
-    std::cout << "\n";
+    std::cout << "\n";*/
 
 
     std::cout << tree <<"\n\n";
@@ -90,7 +90,7 @@ void UniverseImpl<FP>::calculateNextAcc() {
     }
 
     flattenTree();
-    std::cout << tree << "\n\n";
+//    std::cout << tree << "\n\n";
 //        calcNextPosition();
 }
 
@@ -172,12 +172,12 @@ void UniverseImpl<FP>::buildTree() {
 //    std::cout << *this <<"\n";
 
     scalePositions();
-//    std::cout << "Scaled positions" << std::endl;
-//    std::cout << treeBoundingBox << std::endl;
-//    std::cout << *this <<"\n";
+    std::cout << "Scaled positions" << std::endl;
+    std::cout << treeBoundingBox << std::endl;
+    std::cout << tree <<"\n";
     calcSFCIndices();
-//    std::cout << "Calculated SFCIndices" << std::endl;
-//    std::cout << *this <<"\n";
+    std::cout << "Calculated SFCIndices" << std::endl;
+    std::cout << tree <<"\n";
 
     for (unsigned i = 0; i < tree.size() - 1; ++i) {
         if ((tree[i] == tree[i + 1])) {
@@ -187,17 +187,17 @@ void UniverseImpl<FP>::buildTree() {
     }
 
     generateInternalNodes();
-//    std::cout << "Generated internal nodes" << std::endl;
-//    std::cout << *this <<"\n";
+    std::cout << "Generated internal nodes" << std::endl;
+    std::cout << tree <<"\n";
     removeDuplicateInternalNodes();
-//    std::cout << "Removed duplicate internal nodes" << std::endl;
-//    std::cout << *this <<"\n";
+    std::cout << "Removed duplicate internal nodes" << std::endl;
+    std::cout << tree <<"\n";
     establishParentChildRel();
-//    std::cout << "Established parent-child relation" << std::endl;
-//    std::cout << *this <<"\n";
+    std::cout << "Established parent-child relation" << std::endl;
+    std::cout << tree <<"\n";
     calculateNodeData();
-//    std::cout << "Calculated node data" << std::endl;
-//    std::cout << *this <<"\n";
+    std::cout << "Calculated node data" << std::endl;
+    std::cout << tree <<"\n";
     treeIsBuilt = true;
 }
 
