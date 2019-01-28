@@ -51,10 +51,10 @@ from PyGnuplot import c, figure
 
 
 def s(data, file=None):
-    with open(file if file else "tmp.dat", "w") as f:
+    with open(file if file else "dat.temp", "w") as f:
         for tuple_ in data:
             print(("{} " * len(tuple_)).rstrip().format(*tuple_), file=f)
-            print(("{} " * len(tuple_)).rstrip().format(*tuple_))
+            # print(("{} " * len(tuple_)).rstrip().format(*tuple_))
             # f.write(f"{x} {y}\n")
 
 
@@ -75,41 +75,63 @@ def setLineStyles():
     c("set pointintervalbox 2.5")
 
 
-for name, val in implementationCompTimes[0].items():
-    s(val, f"{name}.temp")
+def stripPrefix(name):
+    return name.replace("brute-force", "").replace("barnes-hut", "").strip("-")
+
+
+def stripSuffix(name):
+    return name.replace("double", "").replace("float", "").strip("-")
 
 figure()
+c(f"set term epslatex")
 setLineStyles()
 c(f"set logscale xy 2")
 c(f"set key left")
 
 plots = ""
-for i, name in enumerate(implementationCompTimes[0].keys()):
+for i, (name, val) in enumerate(implementationCompTimes[0].items()):
+    s(val, f"{name}.temp")
     plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1},'
 plots.rstrip(",")
 
+c(f'set output "compareAll.tex"')
 c(f'plot {plots}')
+c(f'unset output')
 
-
-for name, val in implementationCompTimes[0].items():
-    if "opencl" in name:
-        openclTime = implementationCompTimes[0]["brute-force-opencl-double"]
-        s([(nbodies, baseTime/time) for (nbodies, time), (_, baseTime) in zip(val, openclTime)], f"{name}-speedup.temp")
 
 figure()
+c(f"set term epslatex")
 setLineStyles()
 c(f"set logscale xy 2")
 c(f"set key left")
 
 plots = ""
-for i, name in enumerate(implementationCompTimes[0].keys()):
+for i, (name, val) in enumerate((name, val) for name, val in implementationCompTimes[0].items()
+                                if "opencl" in name):
     if "opencl" in name:
         plots += f'"{name}-speedup.temp" using 1:2 title "{name} speedup" with linespoints ls {i + 1},'
 plots.rstrip(",")
 
+c(f'set output "speedupOpenCL.tex"')
 c(f'plot {plots}')
+c(f'unset output')
 
+figure()
+# c(f"set term epslatex")
+c(f"set term wxt")
+setLineStyles()
+c(f"set logscale xy 2")
+c(f'set key left')
 
+plots = ""
+for i, (name, val) in enumerate((name, val) for name, val in implementationCompTimes[0].items()
+                                if "double" in name and ("cpu" in name or "opencl-" in name)):
+    name = stripPrefix(name)
+    name = stripSuffix(name)
+    baseTimes = implementationCompTimes[0]["brute-force-cpu-single-thread-double"]
+    s([(nbodies, baseTime/time) for (nbodies, time), (_, baseTime) in zip(val, baseTimes)], f"{name}.temp")
+    plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1},'
+c(f'plot [][0.5:*] {plots}')
 
 
 # for filename in [x for x in os.listdir(".") if ".temp" in x]:
