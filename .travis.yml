@@ -55,7 +55,7 @@ matrix:
 #    env: brew install gcc && CC=gcc-8 && CXX=g++-8
 
 script: [
-  "cmake -DCMAKE_BUILD_TYPE=RELEASE ..",
+  "cmake -DCMAKE_BUILD_TYPE=RELEASE -DCHARON_TRAVIS_TEST=ON ..",
   "cmake --build .",
 #  "ctest",
   "cd test",
