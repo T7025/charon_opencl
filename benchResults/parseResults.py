@@ -14,7 +14,7 @@ openclCompTimes = {}
 
 files = [f for f in os.listdir(".") if ".json" in f]
 files.sort()
-for filename in files:
+for filename in files[-2:-1]:
     with open(filename, "r") as f:
         contents = json.loads(f.read())
 

@@ -21,6 +21,7 @@ before_script: [
   "ls -Al",
   "mkdir build",
   "cd build",
+  "lscpu",
 ]
 
 matrix:
@@ -39,7 +40,7 @@ matrix:
     addons:
       apt:
         sources: [ubuntu-toolchain-r-test, ]
-        packages: [g++-8, ocl-icd-opencl-dev, beignet-dev, libltdl-dev, libhwloc-dev, pkg-config, libedit-dev, ]
+        packages: [g++-8, ocl-icd-opencl-dev, ocl-icd-libopencl1, opencl-headers ]
 #        packages: [g++-8, ocl-icd-libopencl1]
 #        update: true
 
