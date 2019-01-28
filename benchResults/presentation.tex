@@ -1,0 +1,226 @@
+\documentclass{beamer}
+
+\usepackage[cp1252,utf8]{inputenc}
+\usepackage[dutch]{babel}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{geometry}
+%\usepackage{mathtools}
+\usepackage{multicol}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{geometry}
+\usepackage[noend]{algpseudocode}
+\usepackage{pgfpages}
+\usepackage{listings}
+\usepackage{color}
+
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+
+\lstset{
+	frame=tb,
+	language=python,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{red},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+
+\newcommand{\btVFill}{\vskip0pt plus 1filll}
+
+%Information to be included in the title page:
+\title{Project Advanced Programming}
+\subtitle{N-body Simulation}
+\author{Thomas Van Bogaert}
+\date{}
+
+\AtBeginSection[]
+{
+	\begin{frame}
+		\frametitle{}
+		\tableofcontents[currentsection]
+	\end{frame}
+}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{navigation symbols}{}
+
+%\setbeameroption{show notes}
+%\setbeameroption{show notes on second screen=right}
+
+\newcommand{\light}[1]{\textcolor{gray}{#1}}
+
+\begin{document}
+	
+	\frame{\titlepage}
+	\begin{frame}{Wat is een N-body simulatie?}
+		\note{
+			
+		}
+		\begin{itemize}
+			\item Een simulatie van de werking van krachten tussen verschillende objecten
+			\item In het algemeen moet de kracht tussen elk paar objecten berekend worden
+			\item Bevoorbeeld: interacties tussen geladen deeltjes of interactie van zwaartekracht tussen sterren
+		\end{itemize}
+		
+	\end{frame}
+	
+%	\begin{frame}{Waarom een N-body simulatie?}
+%		\begin{itemize}
+%			\item Verschillende algoritmes beschikbaar (brute force, barnes-hut)
+%			\item Goed voorbeeld van een paralleliseerbaar systeem
+%		\end{itemize}
+%	\end{frame}
+	\begin{frame}
+			Ik heb het geval van zwaartekracht verder uitgewerkt en twee algoritmes ge\"implementeerd:
+			\begin{itemize}
+				\item Brute force
+				\item Barnes-Hut
+			\end{itemize}
+			In het implementeren heb ik mij vooral gefocused op performantie
+	\end{frame}
+	
+	\begin{frame}{Uitleg resultaten}
+		\note{Vooraleer we naar de resultaten van het brute force algoritme kijken}
+		\begin{itemize}
+			\item Speedup: Hoeveel keer sneller wordt het algoritme als er meerdere cores gebruikt worden
+			\item \b Strong scaling: Voor hoeveel overhead zorgt het parellalisme? Geeft effici\"entie t.o.v. single thread
+		\end{itemize}
+	\end{frame}
+	
+	\defverbatim[colored]\codeBF{
+		\begin{lstlisting}
+		for bodyA in bodies:
+			newAcceleration = (0, 0, 0)
+			for bodyB in bodies:  # bodyB wordt nooit aangepast
+				if bodyA != bodyB:
+					forceAB = force(bodyA, bodyB)
+					newAcceleration += forceAB / massA
+			updateVelocity(bodyA, newAcceleration)
+			updateAcceleration(bodyA, newAcceleration)
+		\end{lstlisting}
+	}
+	
+	\begin{frame}{Brute force}
+		\begin{itemize}
+			\item $O(n^2)$
+			\item Zeer goed paralleliseerbaar.
+		\end{itemize}
+		\codeBF
+	\end{frame}
+	\begin{frame}{Speedup between OpenCL Implementations}
+		\begin{center}
+			\resizebox{!}{.7\paperheight}{\input{speedupOpenCL.tex}}
+		\end{center}
+	\end{frame}
+	
+	\begin{frame}{Speedup between different implementations (double)}
+		\begin{center}
+			\resizebox{!}{.7\paperheight}{\input{speedupDouble.tex}}
+		\end{center}
+	\end{frame}
+%	\begin{frame}{Resultaten Brute Force Multithread: Speedup}
+%		\begin{center}
+%			\resizebox{!}{.7\paperheight}{\input{BFMTSpeedup.tex}}
+%		\end{center}
+%	\end{frame}
+%
+%	
+%	\begin{frame}{Resultaten Brute Force Multithread: Strong scaling}
+%		\begin{center}
+%			\resizebox{!}{.7\paperheight}{\input{BFStrong.tex}}
+%		\end{center}
+%	\end{frame}
+%	
+%	\begin{frame}{Resultaten Brute Force GPU: Speedup}
+%		\begin{center}
+%			\resizebox{!}{.7\paperheight}{\input{BFOSpeedup.tex}}
+%		\end{center}
+%	\end{frame}
+
+	\defverbatim[colored]\codeBH{
+		\begin{lstlisting}
+		for body in bodies:
+			# traverses tree
+			newAcceleration = calculateAcceleration(body, root)  
+			updateVelocity(bodyA, newAcceleration)
+			updateAcceleration(bodyA, newAcceleration)
+		\end{lstlisting}
+	}
+
+	\begin{frame}{Barnes-Hut}
+		\note{
+			
+		}
+		\begin{itemize}
+			\item $O(n log(n))$
+			\item Deelt lichamen onder in octree
+			\item Het is niet nodig om krachten tussen elk paar lichamen te berekenen.
+			
+			 Schat verafgelegen lichamen af door het massacentrum
+			
+			\item Twee implementaties
+			\begin{itemize}
+				\item Iteratief gebruikmakend van space filling curve
+				\item Recursief
+			\end{itemize}
+		\end{itemize}
+		\codeBH
+	\end{frame}
+	
+%	\begin{frame}{Barnes-Hut algoritme}
+%		\begin{center}
+%			\includegraphics[width= 0.8\linewidth]{quadTreeBH.png}
+%		\end{center}
+%	\end{frame}
+%
+%	\begin{frame}{Resultaten Barnes-Hut Multithread: Speedup}
+%		\begin{center}
+%			\resizebox{!}{.7\paperheight}{\input{BHMTSpeedup.tex}}
+%		\end{center}
+%	\end{frame}
+%
+%	\begin{frame}{Resultaten Barnes-Hut Multithread: Strong scaling}
+%		\begin{center}
+%			\resizebox{!}{.7\paperheight}{\input{BHStrong.tex}}
+%		\end{center}
+%	\end{frame}
+%
+%	\begin{frame}{Resultaten Barnes-Hut GPU: Speedup (slowdown)}
+%		\begin{center}
+%			\resizebox{!}{.7\paperheight}{\input{BHOSpeedup.tex}}
+%		\end{center}
+%	\end{frame}
+%
+%	\begin{frame}{Resultaten Barnes-Hut Recursief}
+%		\begin{center}
+%			\resizebox{!}{.7\paperheight}{\input{BHTSpeedup.tex}}
+%		\end{center}
+%	\end{frame}
+	
+	\begin{frame}{Resultaat van simulatie}
+		\begin{center}
+%			\includegraphics[width=0.8\linewidth]{out.png}
+%			\movie{\includegraphics[width=0.8\linewidth]{out.png}}{out2.ogv}
+		\end{center}
+	\end{frame}
+	
+	\begin{frame}{Einde}
+		\begin{center}
+			Nog vragen?
+		\end{center}
+	\end{frame}
+	
+\end{document}
+
