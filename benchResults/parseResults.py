@@ -10,11 +10,13 @@ import json
 # legend: different settings/implementations
 
 implementationCompTimes = []
-openclCompTimes = {}
+# openclCompTimes = {}
 
 files = [f for f in os.listdir(".") if ".json" in f]
+files = [f for f in files if "augmented.json" in f]
 files.sort()
-for filename in files[-2:-1]:
+for filename in files:
+    print("file:", filename)
     with open(filename, "r") as f:
         contents = json.loads(f.read())
 
@@ -28,12 +30,12 @@ for filename in files[-2:-1]:
             graphData[implementation] = []
         graphData[implementation].append((settings["numberOfBodies"], benchmark["stepDuration"] / 10 ** 9))
 
-        if implementation not in openclCompTimes:
-            openclCompTimes[implementation] = {}
-        if filename[:-5] not in openclCompTimes[implementation]:
-            openclCompTimes[implementation][filename[:-5]] = []
-        openclCompTimes[implementation][filename[:-5]].append(
-            (settings["numberOfBodies"], benchmark["stepDuration"] / 10 ** 9))
+        # if implementation not in openclCompTimes:
+        #     openclCompTimes[implementation] = {}
+        # if filename[:-5] not in openclCompTimes[implementation]:
+        #     openclCompTimes[implementation][filename[:-5]] = []
+        # openclCompTimes[implementation][filename[:-5]].append(
+        #     (settings["numberOfBodies"], benchmark["stepDuration"] / 10 ** 9))
 
     for val in graphData.values():
         val.sort()
@@ -42,8 +44,8 @@ for filename in files[-2:-1]:
 for g in implementationCompTimes:
     print(g)
 
-for key, val in openclCompTimes.items():
-    print(key, val)
+# for key, val in openclCompTimes.items():
+#     print(key, val)
 
 from PyGnuplot import c, figure
 
@@ -78,6 +80,7 @@ for name, val in implementationCompTimes[0].items():
 
 figure()
 setLineStyles()
+c(f"set logscale xy 2")
 c(f"set key left")
 
 plots = ""
@@ -87,9 +90,24 @@ plots.rstrip(",")
 
 c(f'plot {plots}')
 
+
+for name, val in implementationCompTimes[0].items():
+    if "opencl" in name:
+        openclTime = implementationCompTimes[0]["brute-force-opencl-double"]
+        s([(nbodies, baseTime/time) for (nbodies, time), (_, baseTime) in zip(val, openclTime)], f"{name}-speedup.temp")
+
 figure()
 setLineStyles()
+c(f"set logscale xy 2")
 c(f"set key left")
+
+plots = ""
+for i, name in enumerate(implementationCompTimes[0].keys()):
+    if "opencl" in name:
+        plots += f'"{name}-speedup.temp" using 1:2 title "{name} speedup" with linespoints ls {i + 1},'
+plots.rstrip(",")
+
+c(f'plot {plots}')
 
 
 
