@@ -4,8 +4,8 @@
 
 #include "Universe.hpp"
 #include <filesystem>
-#include <boost/compute/algorithm/sort.hpp>
-#include <boost/compute/core.hpp>
+//#include <boost/compute/algorithm/sort.hpp>
+//#include <boost/compute/core.hpp>
 
 
 template class Universe<Algorithm::barnesHut, Platform::openCL, float>;
