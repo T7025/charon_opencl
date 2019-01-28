@@ -71,7 +71,8 @@ def setLineStyles():
     ]
     for i, color in enumerate(colors):
         # print(f'set style line {i + 1} lt 1 pt 7 lc rgb "{color}" lw 1.5')
-        c(f'set style line {i + 1} lt 1 pt 7 lc rgb \'{color}\' lw 1.5 pi -1 ps 1.5')
+        c(f'set style line {i + 1} lt 1 pt 7 lc rgb \'{color}\' lw 1.5 pi -0 ps 1.5')
+        # c(f'set style line {i + 1} lt 1 pt 7 lc rgb \'{color}\' lw 1.5 pi -1 ps 1.5')
     c("set pointintervalbox 2.5")
 
 
@@ -103,25 +104,47 @@ figure()
 c(f"set term epslatex")
 setLineStyles()
 c(f"set logscale xy 2")
-c(f"set key left")
-
+c(f"set grid xy")
+c(f"set key above left")
 plots = ""
 for i, (name, val) in enumerate((name, val) for name, val in implementationCompTimes[0].items()
                                 if "opencl" in name):
-    if "opencl" in name:
-        plots += f'"{name}-speedup.temp" using 1:2 title "{name} speedup" with linespoints ls {i + 1},'
+    name = stripPrefix(name)
+    s(val, f"{name}.temp")
+    plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1},'
 plots.rstrip(",")
+c(f'set output "compareOpenCL.tex"')
+c(f'plot {plots}')
+c(f'unset output')
 
+figure()
+c(f"set term epslatex")
+setLineStyles()
+c(f"set logscale xy 2")
+c(f"set grid xy")
+c(f"set key above left")
+c(f'set xlabel "\\\\\\#bodies"')
+c(f'set ylabel "Speedup"')
+plots = ""
+for i, (name, val) in enumerate((name, val) for name, val in implementationCompTimes[0].items()
+                                if "opencl" in name):
+    name = stripPrefix(name)
+    baseTimes = implementationCompTimes[0]["brute-force-opencl-double"]
+    s([(nbodies, baseTime/time) for (nbodies, time), (_, baseTime) in zip(val, baseTimes)], f"{name}.temp")
+    plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1},'
+plots.rstrip(",")
 c(f'set output "speedupOpenCL.tex"')
 c(f'plot {plots}')
 c(f'unset output')
 
 figure()
-# c(f"set term epslatex")
-c(f"set term wxt")
+c(f"set term epslatex")
+# c(f"set term wxt")
 setLineStyles()
 c(f"set logscale xy 2")
-c(f'set key left')
+c(f'set grid xy')
+c(f'set arrow from 128,6 to 32786,6 nohead ls 0')
+c(f'set key above left')
 
 plots = ""
 for i, (name, val) in enumerate((name, val) for name, val in implementationCompTimes[0].items()
@@ -131,7 +154,10 @@ for i, (name, val) in enumerate((name, val) for name, val in implementationCompT
     baseTimes = implementationCompTimes[0]["brute-force-cpu-single-thread-double"]
     s([(nbodies, baseTime/time) for (nbodies, time), (_, baseTime) in zip(val, baseTimes)], f"{name}.temp")
     plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1},'
+
+c(f'set output "speedupDouble.tex"')
 c(f'plot [][0.5:*] {plots}')
+c(f'unset output')
 
 
 # for filename in [x for x in os.listdir(".") if ".temp" in x]:
