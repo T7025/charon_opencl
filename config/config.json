@@ -4,13 +4,13 @@
   "resultsFilenamePrefix": "out_",
   "algorithm": "barnes-hut",
   "barnesHutCutoff": 0.7,
-  "platform": "cpu-single-thread",
+  "platform": "cpu-multi-thread",
   "numThreads": 6,
   "openclCompileOpts": "-cl-fast-relaxed-math",
   "floatingPointType": "float",
-  "numberOfBodies": 100,
+  "numberOfBodies": 1000000,
   "timeStep": 0.001,
   "snapshotDelta": 50,
-  "nrOfSteps": 5,
+  "nrOfSteps": 200,
   "softeningLength": 0.005
 }

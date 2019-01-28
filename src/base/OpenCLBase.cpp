@@ -7,7 +7,7 @@
 #include <fstream>
 #include "OpenCLBase.hpp"
 
-OpenCLBase::OpenCLBase(const cl::Program::Sources &sources, const Settings &settings) {
+OpenCLBase::OpenCLBase(const cl::Program::Sources &sources, const Settings &settings, const std::string &compileOpts) {
     const auto clDeviceType = CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_CPU;
 //    const auto clDeviceType = CL_DEVICE_TYPE_GPU;
 
@@ -53,7 +53,7 @@ OpenCLBase::OpenCLBase(const cl::Program::Sources &sources, const Settings &sett
     program = cl::Program{*context, sources};
     //std::cout << "Building kernels...\n";
     try {
-        program.build({device}, settings.openclCompileOpts.c_str());
+        program.build({device}, (settings.openclCompileOpts + ";" + compileOpts).c_str());
     }
     catch (cl::BuildError &e) {
         std::cout << " Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device) << "\n";

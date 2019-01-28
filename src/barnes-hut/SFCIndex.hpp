@@ -9,6 +9,7 @@
 constexpr unsigned k = 64;  // Max tree depth.
 using uintv = uint64_t;
 using intv = int64_t;
+static_assert(sizeof(uintv) * 8 == k);
 
 class SFCIndex {
 public:

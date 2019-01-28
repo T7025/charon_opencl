@@ -32,6 +32,19 @@ if (NOT nlohmann_json_POPULATED)
     add_subdirectory(${nlohmann_json_SOURCE_DIR} ${nlohmann_json_BINARY_DIR})
 endif ()
 
+FetchContent_Declare(
+        boost_compute
+        GIT_REPOSITORY https://github.com/boostorg/compute.git
+        GIT_TAG boost-1.69.0
+)
+FetchContent_GetProperties(boost_compute)
+if (NOT boost_compute_POPULATED)
+    FetchContent_Populate(boost_compute)
+    set(BOOST_COMPUTE_USE_CPP11 ON CACHE BOOL "Use C++11 features")
+    add_subdirectory(${boost_compute_SOURCE_DIR} ${boost_compute_BINARY_DIR})
+
+endif ()
+
 #FetchContent_Declare(
 #        Zupply
 #        GIT_REPOSITORY https://github.com/zhreshold/zupply.git

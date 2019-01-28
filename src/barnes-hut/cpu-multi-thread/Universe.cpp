@@ -4,17 +4,19 @@
 
 #include "Universe.hpp"
 #include <barnes-hut/BitShift.hpp>
+#include <parallel/algorithm>
 
-template class Universe<Algorithm::barnesHut, Platform::cpuSingleThread, float>;
-template class Universe<Algorithm::barnesHut, Platform::cpuSingleThread, double>;
+template class Universe<Algorithm::barnesHut, Platform::cpuMultiThread, float>;
+template class Universe<Algorithm::barnesHut, Platform::cpuMultiThread, double>;
 
 template <typename FP>
-using UniverseImpl = Universe<Algorithm::barnesHut, Platform::cpuSingleThread, FP>;
-
+using UniverseImpl = Universe<Algorithm::barnesHut, Platform::cpuMultiThread, FP>;
 
 template <typename FP>
 UniverseImpl<FP>::Universe(Settings settings) :
-        UniverseBase{settings}, errorRate{(FP) settings.barnesHutCutoff} {}
+        UniverseBase{settings}, errorRate{(FP) settings.barnesHutCutoff} {
+            omp_set_num_threads(this->settings.numThreads > 0 ? this->settings.numThreads : omp_get_max_threads());
+        }
 
 template <typename FP>
 void UniverseImpl<FP>::init(std::unique_ptr<BodyGenerator> bodyGenerator) {
@@ -51,8 +53,8 @@ void UniverseImpl<FP>::calcNextStep() {
 
 template <typename FP>
 void UniverseImpl<FP>::calculateFirstAcc() {
-
     buildTree();
+    #pragma omp parallel for
     for (unsigned i = 0; i < tree.size(); ++i) {
         if (tree[i].isLeaf()) {
             Vec3<FP> newAcceleration = calculateAcceleration(tree[i]);
@@ -65,22 +67,8 @@ void UniverseImpl<FP>::calculateFirstAcc() {
 
 template <typename FP>
 void UniverseImpl<FP>::calculateNextAcc() {
-//    auto start = omp_get_wtime();
     buildTree();
-
-
-    std::vector<unsigned> bodyIDs;
-    bodyIDs.reserve(numBodies);
-    for (unsigned i = 0; i < tree.size(); ++i) {
-        if (tree[i].isLeaf()) {
-            bodyIDs.push_back(i);
-            std::cout << i << ",";
-        }
-    }
-    std::cout << "\n";
-
-
-    std::cout << tree <<"\n\n";
+    #pragma omp parallel for
     for (unsigned i = 0; i < tree.size(); ++i) {
         if (tree[i].isLeaf()) {
             Vec3<FP> newAcceleration = calculateAcceleration(tree[i]);
@@ -88,10 +76,7 @@ void UniverseImpl<FP>::calculateNextAcc() {
             tree[i].getAcceleration() = newAcceleration;
         }
     }
-
     flattenTree();
-    std::cout << tree << "\n\n";
-//        calcNextPosition();
 }
 
 template <typename FP>
@@ -99,6 +84,7 @@ void UniverseImpl<FP>::calcNextPosition() {
     assert(!treeIsBuilt);
 
     const auto size = numBodies;
+    #pragma omp parallel for
     for (unsigned i = 0; i < size; ++i) {
         auto &pos = tree[i].getPosition();
         const auto &vel = tree[i].getVelocity();
@@ -161,7 +147,7 @@ Vec3<FP> UniverseImpl<FP>::calculateAcceleration(const Node<FP> &targetNode) con
 template <typename FP>
 void UniverseImpl<FP>::flattenTree() {
     assert(treeIsBuilt);
-    std::sort(tree.begin(), tree.end(),
+    __gnu_parallel::sort(tree.begin(), tree.end(),
               [](const Node<FP> &lhs, const Node<FP> &rhs) { return lhs.getDepth() > rhs.getDepth(); });
     tree.resize(numBodies);
     treeIsBuilt = false;
@@ -179,6 +165,7 @@ void UniverseImpl<FP>::buildTree() {
 //    std::cout << "Calculated SFCIndices" << std::endl;
 //    std::cout << *this <<"\n";
 
+    #pragma omp parallel for
     for (unsigned i = 0; i < tree.size() - 1; ++i) {
         if ((tree[i] == tree[i + 1])) {
             std::cout << tree[i] << "\n" << tree[i + 1] << "\n";
@@ -203,33 +190,33 @@ void UniverseImpl<FP>::buildTree() {
 
 template <typename FP>
 void UniverseImpl<FP>::sortTree() {
-    std::sort(tree.begin(), tree.end());
+    __gnu_parallel::sort(tree.begin(), tree.end());
 }
 
 template <typename FP>
 void UniverseImpl<FP>::scalePositions() {
-    Vec3<FP> min = {
+    Vec3<FP> vMin = {
             std::numeric_limits<FP>::infinity(),
             std::numeric_limits<FP>::infinity(),
             std::numeric_limits<FP>::infinity()
     };
-    Vec3<FP> max = {
+    Vec3<FP> vMax = {
             -std::numeric_limits<FP>::infinity(),
             -std::numeric_limits<FP>::infinity(),
             -std::numeric_limits<FP>::infinity()
     };
     const auto size = tree.size();
+    #pragma omp declare reduction(min : Vec3<FP> : omp_out.min(omp_in)) \
+        initializer(omp_priv = {std::numeric_limits<FP>::infinity(), std::numeric_limits<FP>::infinity(), std::numeric_limits<FP>::infinity()})
+    #pragma omp declare reduction(max : Vec3<FP> : omp_out.max(omp_in)) \
+        initializer(omp_priv = {-std::numeric_limits<FP>::infinity(), -std::numeric_limits<FP>::infinity(), -std::numeric_limits<FP>::infinity()})
+    #pragma omp parallel for reduction(min : vMin) reduction(max : vMax)
     for (unsigned i = 0; i < size; ++i) {
-        min.x = std::min(min.x, tree[i].getPosition().x);
-        min.y = std::min(min.y, tree[i].getPosition().y);
-        min.z = std::min(min.z, tree[i].getPosition().z);
-        max.x = std::max(max.x, tree[i].getPosition().x);
-        max.y = std::max(max.y, tree[i].getPosition().y);
-        max.z = std::max(max.z, tree[i].getPosition().z);
+        vMin.min(tree[i].getPosition());
+        vMax.max(tree[i].getPosition());
     }
-    offset = min;
-    //treeBoundingBoxSize = std::max(max.x, std::max(max.y, max.z));
-    treeBoundingBox = max - min;
+    offset = vMin;
+    treeBoundingBox = vMax - vMin;
     treeBoundingBox.x = std::max(treeBoundingBox.x, std::numeric_limits<FP>::min());
     treeBoundingBox.y = std::max(treeBoundingBox.y, std::numeric_limits<FP>::min());
     treeBoundingBox.z = std::max(treeBoundingBox.z, std::numeric_limits<FP>::min());
@@ -238,6 +225,7 @@ void UniverseImpl<FP>::scalePositions() {
 template <typename FP>
 void UniverseImpl<FP>::calcSFCIndices() {
     const FP mult = std::pow(2, k);
+    #pragma omp parallel for
     for (unsigned i = 0; i < tree.size(); ++i) {
         const auto pos = tree[i].getPosition() - offset;
         tree[i].getSFCIndex().x = uintv(mult * (pos.x / treeBoundingBox.x)) - uintv(pos.x == treeBoundingBox.x);
@@ -253,6 +241,7 @@ void UniverseImpl<FP>::generateInternalNodes() {
     auto treeSize = tree.size();
     tree.resize(2 * treeSize - 1);
 
+    #pragma omp parallel for
     for (unsigned i = 0; i < treeSize - 1; ++i) {
         // Count leading zeroes long long
         auto xorX = __builtin_clzll(tree[i].getSFCIndex().x ^ tree[i + 1].getSFCIndex().x);
@@ -286,6 +275,7 @@ void UniverseImpl<FP>::establishParentChildRel() {
 
     tree.resize(2 * treeSize - 1);
 
+    #pragma omp parallel for
     for (unsigned i = 0; i < treeSize - 1; ++i) {
         auto shift = k - std::min(tree[i].getDepth(), tree[i + 1].getDepth());
         auto xorX = __builtin_clzll(rshift(tree[i].getSFCIndex().x ^ tree[i + 1].getSFCIndex().x, shift));
@@ -313,8 +303,9 @@ void UniverseImpl<FP>::establishParentChildRel() {
         return lhs < rhs || (lhs == rhs && lhs.getChildren()[0] < rhs.getChildren()[0]);
     };
 
-    std::sort(tree.begin() + treeSize, tree.end(), nodeCompWChildren);
+    __gnu_parallel::sort(tree.begin() + treeSize, tree.end(), nodeCompWChildren);
 
+    #pragma omp parallel for
     for (unsigned i = treeSize; i < tree.size(); ++i) {
         if (i == tree.size() - 1 || !(tree[i] == tree[i + 1])) {
             unsigned j;
@@ -340,6 +331,7 @@ void UniverseImpl<FP>::establishParentChildRel() {
 
 template <typename FP>
 void UniverseImpl<FP>::calculateNodeData() {
+    #pragma omp parallel for
     for (unsigned i = 0; i < tree.size(); ++i) {
         if (tree[i].getDepth() != k) {
             FP mass = 0;

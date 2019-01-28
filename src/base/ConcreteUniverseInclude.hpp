@@ -11,3 +11,4 @@
 #include <brute-force/openclloc/Universe.hpp>
 #include <brute-force/openclvec/Universe.hpp>
 #include <barnes-hut/cpu-single-thread/Universe.hpp>
+#include <barnes-hut/cpu-multi-thread/Universe.hpp>

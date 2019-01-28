@@ -32,7 +32,7 @@ template <> struct CLFloatTypeGet<float> {
 
 class OpenCLBase {
 public:
-    explicit OpenCLBase(const cl::Program::Sources &sources, const Settings &settings);
+    OpenCLBase(const cl::Program::Sources &sources, const Settings &settings, const std::string &compileOpts="");
 
     static std::string getKernelSource(const std::filesystem::path &filePath);
 
@@ -42,6 +42,9 @@ public:
                                             vector.size() * sizeof(T), vector.data());
     }
 
+    unsigned getGlobWorkSize(unsigned minWorkSize, unsigned localWorkSize) {
+        return (minWorkSize / localWorkSize + 1) * localWorkSize;
+    };
 protected:
     cl::Platform platform;
     cl::Device device;

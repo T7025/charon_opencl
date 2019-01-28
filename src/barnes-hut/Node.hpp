@@ -104,14 +104,12 @@ public:
 
     bool isParentOf(const Node &other) const {
         if (depth < other.depth) {
-            auto shift = k - depth + (sizeof(uintv) * 8 - k);
-            const auto isMax = static_cast<const unsigned>(shift == sizeof(uintv) * 8);
-            shift -= isMax;
-            if (((sfcIndex.x ^ other.sfcIndex.x) >> shift) >> isMax == 0
-                && ((sfcIndex.y ^ other.sfcIndex.y) >> shift) >> isMax == 0
-                && ((sfcIndex.z ^ other.sfcIndex.z) >> shift) >> isMax == 0) {
-                return true;
-            }
+            auto shift = k - depth;
+            // If xor of (depth) most significant bits is zero (=they are equal),
+            // then this Node is a parent of other Node.
+            return depth == 0 || (((sfcIndex.x ^ other.sfcIndex.x) >> shift) == 0
+                                  && ((sfcIndex.y ^ other.sfcIndex.y) >> shift) == 0
+                                  && ((sfcIndex.z ^ other.sfcIndex.z) >> shift) == 0);
         }
         return false;
     }

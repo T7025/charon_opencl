@@ -81,7 +81,7 @@ void Simulator::run() {
             timeBetweenUpdates = progressWait;
             lastTimeLeft = double(settings.nrOfSteps - *step) / (*step - lastStep);
         }
-        secLeft = unsigned(lastTimeLeft * expectedTimeUntilUpdate) + progressWait - timeBetweenUpdates;
+        secLeft = (unsigned)std::max((lastTimeLeft * expectedTimeUntilUpdate) + progressWait - timeBetweenUpdates, 0.0);
 
         std::cout << double(*step) * 100 / settings.nrOfSteps
                   << "% done (" << *step << "/" << settings.nrOfSteps;

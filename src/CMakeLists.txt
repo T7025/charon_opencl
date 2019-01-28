@@ -36,13 +36,16 @@ add_library(
         base/ConcreteUniverseInclude.hpp
         barnes-hut/cpu-single-thread/Universe.cpp
         barnes-hut/cpu-single-thread/Universe.hpp
+        barnes-hut/cpu-multi-thread/Universe.cpp
+        barnes-hut/cpu-multi-thread/Universe.hpp
         base/OpenCLBase.cpp
         base/OpenCLBase.hpp
         barnes-hut/Node.cpp
         barnes-hut/Node.hpp
         barnes-hut/SFCIndex.cpp
         barnes-hut/SFCIndex.hpp
-        barnes-hut/opencl/Universe.cpp barnes-hut/opencl/Universe.hpp)
+        barnes-hut/opencl/Universe.cpp
+        barnes-hut/opencl/Universe.hpp barnes-hut/BitShift.hpp barnes-hut/opencl/sort/merge_sort_on_gpu.hpp)
 target_compile_features(libcharon PUBLIC cxx_std_17)
 
 target_compile_options(

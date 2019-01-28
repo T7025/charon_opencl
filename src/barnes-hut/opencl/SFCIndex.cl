@@ -1,10 +1,11 @@
-#define k 64
-#define FP float
-#define Int int
-#define UInt unsigned
-#define FPVec float4
-#define IntVec int4
-#define UIntVec uint4
+//#define k 32
+//#define Int int
+//#define UInt unsigned
+//#define Float float
+//#define IntVec intX
+//#define UIntVec uintX
+//#define FloatVec floatX
+//#define Float3 float3
 
 struct SFCIndex {
     UInt x, y, z;
