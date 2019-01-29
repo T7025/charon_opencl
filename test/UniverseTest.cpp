@@ -45,14 +45,13 @@ SCENARIO("Test the position update function", "[universe]") {
             addSettingsImpl(addSettingsImpl, size, name, values...);
         };
 
-//        addSettings("algorithm", "brute-force", "barnes-hut");
+        addSettings("algorithm", "brute-force", "barnes-hut");
 //        addSettings("algorithm", "brute-force");
-        addSettings("algorithm", "barnes-hut");
 //        addSettings("algorithm", "barnes-hut");
         #ifdef CHARON_TRAVIS_TEST
         addSettings("platform", "cpu-single-thread", "cpu-multi-thread");
         #else
-        addSettings("platform", "cpu-single-thread", "cpu-multi-thread");//, "opencl", "openclloc", "openclvec");
+        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclloc", "openclvec");
         #endif
 //        addSettings("platform", "cpu-single-thread");
         addSettings("floatingPointType", "float", "double");
