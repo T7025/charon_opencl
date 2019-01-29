@@ -83,82 +83,122 @@ def stripPrefix(name):
 def stripSuffix(name):
     return name.replace("double", "").replace("float", "").strip("-")
 
-figure()
-c(f"set term epslatex")
-setLineStyles()
-c(f"set logscale xy 2")
-c(f"set key left")
 
-plots = ""
-for i, (name, val) in enumerate(implementationCompTimes[0].items()):
-    s(val, f"{name}.temp")
-    plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1},'
-plots.rstrip(",")
+def makeGraph(graphName, stripFPType, implementationFilter, xSettings, plotRange=None, speedUpBase=None):
+    figure()
+    c(f"set term epslatex")
+    # c(f"set term wxt")
+    setLineStyles()
+    for line in xSettings.split("\n"):
+        line = line.strip()
+        if line:
+            c(f"{line}")
+    plots = ""
+    for i, (name, val) in enumerate((name, val) for name, val in implementationCompTimes[0].items()
+                                    if implementationFilter(name)):
+        isDouble = "float" in name
+        name = stripPrefix(name)
+        if stripFPType:
+            name = stripSuffix(name)
+        if speedUpBase:
+            baseTimes = implementationCompTimes[0][speedUpBase]
+            s([(nbodies, baseTime/time) for (nbodies, time), (_, baseTime) in zip(val, baseTimes)], f"{graphName}{name}Speedup.temp")
+            plots += f'"{graphName}{name}Speedup.temp" using 1:2 title "{name}" with linespoints ls {i + 1} {"pt 9" if isDouble else ""},'
+        else:
+            s(val, f"{graphName}{name}.temp")
+            plots += f'"{graphName}{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1} {"pt 9" if isDouble else ""},'
+    plots.rstrip(",")
+    print(graphName)
+    c(f'set output "{graphName}.tex"')
+    plotRange = plotRange if plotRange is not None else ""
+    c(f'plot {plotRange} {plots}')
+    c(f'unset output')
 
-c(f'set output "compareAll.tex"')
-c(f'plot {plots}')
-c(f'unset output')
+'''
+makeGraph(
+    "compareAll",
+    False,
+    lambda name: True,
+    """
+    set logscale xy 2
+    set grid xtics ytics
+    set key outside above left
+    set xlabel "\\\\\\#bodies
+    set ylabel "Seconds"
+    """
+)
+'''
+makeGraph(
+    "compareOpenCL",
+    False,
+    lambda name: "opencl" in name,
+    """
+    set logscale xy 2
+    set grid xtics ytics
+    set key above left
+    set key font ",18"
+    set xlabel "\\\\\\#bodies
+    set ylabel "Seconds"
+    """
+)
+makeGraph(
+    "speedupOpenCL",
+    False,
+    lambda name: "opencl" in name,
+    """
+    set logscale xy 2
+    set grid xtics ytics
+    set key above left
+    set key font ",18"
+    set xlabel "\\\\\\#bodies
+    set ylabel "Speedup"
+    """,
+    None,
+    "brute-force-opencl-double"
+)
+makeGraph(
+    "compareDifferentDouble",
+    True,
+    lambda name: "double" in name and ("cpu" in name or "opencl-" in name),
+    """
+    set logscale xy 2
+    set grid xtics ytics
+    set key above left
+    set key font ",16"
+    set xlabel "\\\\\\#bodies
+    set ylabel "Seconds"
+    """
+)
+makeGraph(
+    "speedupDifferentDouble",
+    True,
+    lambda name: "double" in name and ("cpu" in name or "opencl-" in name),
+    """
+    set logscale xy 2
+    set grid xtics ytics
+    set key above left
+    set key font ",18"
+    set arrow from 128,6 to 32786,6 nohead ls 0
+    set xlabel "\\\\\\#bodies
+    set ylabel "Speedup"
+    """,
+    "[][0.5:*]",
+    "brute-force-cpu-single-thread-double"
+)
+makeGraph(
+    "compareCpu",
+    False,
+    lambda name: "cpu" in name,
+    """
+    set logscale xy 2
+    set grid xtics ytics
+    set key above left
+    set xlabel "\\\\\\#bodies
+    set ylabel "Seconds"
+    """,
+)
 
-
-figure()
-c(f"set term epslatex")
-setLineStyles()
-c(f"set logscale xy 2")
-c(f"set grid xy")
-c(f"set key above left")
-plots = ""
-for i, (name, val) in enumerate((name, val) for name, val in implementationCompTimes[0].items()
-                                if "opencl" in name):
-    name = stripPrefix(name)
-    s(val, f"{name}.temp")
-    plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1},'
-plots.rstrip(",")
-c(f'set output "compareOpenCL.tex"')
-c(f'plot {plots}')
-c(f'unset output')
-
-figure()
-c(f"set term epslatex")
-setLineStyles()
-c(f"set logscale xy 2")
-c(f"set grid xy")
-c(f"set key above left")
-c(f'set xlabel "\\\\\\#bodies"')
-c(f'set ylabel "Speedup"')
-plots = ""
-for i, (name, val) in enumerate((name, val) for name, val in implementationCompTimes[0].items()
-                                if "opencl" in name):
-    name = stripPrefix(name)
-    baseTimes = implementationCompTimes[0]["brute-force-opencl-double"]
-    s([(nbodies, baseTime/time) for (nbodies, time), (_, baseTime) in zip(val, baseTimes)], f"{name}.temp")
-    plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1},'
-plots.rstrip(",")
-c(f'set output "speedupOpenCL.tex"')
-c(f'plot {plots}')
-c(f'unset output')
-
-figure()
-c(f"set term epslatex")
-# c(f"set term wxt")
-setLineStyles()
-c(f"set logscale xy 2")
-c(f'set grid xy')
-c(f'set arrow from 128,6 to 32786,6 nohead ls 0')
-c(f'set key above left')
-
-plots = ""
-for i, (name, val) in enumerate((name, val) for name, val in implementationCompTimes[0].items()
-                                if "double" in name and ("cpu" in name or "opencl-" in name)):
-    name = stripPrefix(name)
-    name = stripSuffix(name)
-    baseTimes = implementationCompTimes[0]["brute-force-cpu-single-thread-double"]
-    s([(nbodies, baseTime/time) for (nbodies, time), (_, baseTime) in zip(val, baseTimes)], f"{name}.temp")
-    plots += f'"{name}.temp" using 1:2 title "{name}" with linespoints ls {i + 1},'
-
-c(f'set output "speedupDouble.tex"')
-c(f'plot [][0.5:*] {plots}')
-c(f'unset output')
-
-
-# for filename in [x for x in os.listdir(".") if ".temp" in x]:
-#     os.remove(filename)
+import time
+time.sleep(1)
+for filename in [x for x in os.listdir(".") if ".temp" in x]:
+    os.remove(filename)

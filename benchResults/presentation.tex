@@ -64,38 +64,51 @@
 \begin{document}
 	
 	\frame{\titlepage}
-	\begin{frame}{Wat is een N-body simulatie?}
-		\note{
-			
-		}
+	
+	\begin{frame}{Basis van N-body simulatie}
+		\note{}
 		\begin{itemize}
-			\item Een simulatie van de werking van krachten tussen verschillende objecten
-			\item In het algemeen moet de kracht tussen elk paar objecten berekend worden
-			\item Bevoorbeeld: interacties tussen geladen deeltjes of interactie van zwaartekracht tussen sterren
+			\item N lichamen met elk een positie en massa
+			\item Doel: bereken de evolutie van elk lichaam over tijd
+			\item Moeilijkheid: elk lichaam kan elk ander lichaam be\"invloeden
 		\end{itemize}
-		
 	\end{frame}
-	
-%	\begin{frame}{Waarom een N-body simulatie?}
-%		\begin{itemize}
-%			\item Verschillende algoritmes beschikbaar (brute force, barnes-hut)
-%			\item Goed voorbeeld van een paralleliseerbaar systeem
-%		\end{itemize}
-%	\end{frame}
-	\begin{frame}
-			Ik heb het geval van zwaartekracht verder uitgewerkt en twee algoritmes ge\"implementeerd:
-			\begin{itemize}
-				\item Brute force
-				\item Barnes-Hut
-			\end{itemize}
-			In het implementeren heb ik mij vooral gefocused op performantie
-	\end{frame}
-	
-	\begin{frame}{Uitleg resultaten}
-		\note{Vooraleer we naar de resultaten van het brute force algoritme kijken}
+	\begin{frame}{Berekenen van de evolutie van elk lichaam}
+		\note{}
 		\begin{itemize}
-			\item Speedup: Hoeveel keer sneller wordt het algoritme als er meerdere cores gebruikt worden
-			\item \b Strong scaling: Voor hoeveel overhead zorgt het parellalisme? Geeft effici\"entie t.o.v. single thread
+			\item Wiskundig voor te stellen door differentiaalvergelijking
+			\item Benader de oplossing met numerieke integratie
+		\end{itemize}
+	\end{frame}
+	\begin{frame}{Velocity Verlet integratie}
+		\begin{itemize}
+			\item Tweede orde benadering
+			\item Naast positie nu ook snelheid en acceleratie nodig
+			\item Als $\Delta t$ kleiner $\Rightarrow$ benadering preciezer
+		\end{itemize}
+		Op tijd $t$ worden de nieuwe positie en snelheid gegeven door:
+		\begin{align*}
+		\vec{x}(t + \Delta t) =& \vec{x}(t) + \vec{v}(t) \Delta t + \frac{1}{2} \vec{a}(t) \Delta t^2  \\
+		\vec{v}(t + \Delta t) =& \vec{v}(t) + \frac{\vec{a}(t) + \vec{a}(t + \Delta t)}{2} \Delta t
+		\end{align*}
+	\end{frame}
+	\begin{frame}{Velocity Verlet integratie}
+		Probleem: wat als $\vec{a}(t_0)$ niet gegeven?
+		\begin{align*}
+		\vec{x}(t + \Delta t) =& 
+		\vec{x}(t) + \vec{v}(t) \Delta t + \frac{1}{2} \vec{a}(t) \Delta t^2 \\
+		\vec{v}(t + \Delta t) =& \begin{cases}
+		\vec{v}(t) + \vec{a}(t + \Delta t) \Delta t    &\text{als } t = t_0 \\
+		\vec{v}(t) + \frac{\vec{a}(t) + \vec{a}(t + \Delta t)}{2} \Delta t     &\text{als } t \neq t_0 \\
+		\end{cases}
+		\end{align*}
+	\end{frame}
+		
+	\begin{frame}{Berekenen van $\vec{a}(t)$}
+		\begin{itemize}
+			\item In het algemeen: bereken de kracht tussen elk paar objecten
+			\item Brute force: $O(n^2)$
+			\item Barnes-hut benadering: $O(n\log(n))$
 		\end{itemize}
 	\end{frame}
 	
@@ -103,33 +116,82 @@
 		\begin{lstlisting}
 		for bodyA in bodies:
 			newAcceleration = (0, 0, 0)
-			for bodyB in bodies:  # bodyB wordt nooit aangepast
-				if bodyA != bodyB:
-					forceAB = force(bodyA, bodyB)
-					newAcceleration += forceAB / massA
+			for bodyB in bodies:
+				forceAB = force(bodyA, bodyB)
+				newAcceleration += forceAB / massA
 			updateVelocity(bodyA, newAcceleration)
 			updateAcceleration(bodyA, newAcceleration)
 		\end{lstlisting}
 	}
-	
 	\begin{frame}{Brute force}
-		\begin{itemize}
-			\item $O(n^2)$
-			\item Zeer goed paralleliseerbaar.
-		\end{itemize}
 		\codeBF
+		\begin{itemize}
+			\item \texttt{forceAB} is een pure functie
+			\item Zeer goed paralleliseerbaar
+		\end{itemize}
 	\end{frame}
-	\begin{frame}{Speedup between OpenCL Implementations}
+	
+	
+	\begin{frame}{Implementatie in \texttt{C++}}
+		In de implementatie berekent \texttt{forceAB} de aantrekkingskracht onder invloed van zwaartekracht.
+		\\
+		Brute force N-body simulatie implementaties:
+		\begin{itemize}
+			\item Single threaded (cpu-single-thread)
+			\item Multi threaded met OpenMP (cpu-multi-thread)
+			\item Na\"ive OpenCL implementatie (opencl)
+			\item OpenCL implementatie gebruik makend van lokaal geheugen (openclloc)
+			\item OpenCL implementatie met Struct of Arrays (SoA) i.p.v. Array of Structs (AoS) implementatie (openclvec)
+		\end{itemize}
+		Iedere implementatie is beschikbaar met double of single floating point precisie.
+	\end{frame}
+	
+	\begin{frame}{Vergelijking van performantie}
+		\begin{itemize}
+			\item Nu komt de vergelijking van alle brute force implementaties
+			\item Alle assen hebben logaritmische schaal ($\log(2)$)
+			\item Gebruikte CPU: Xeon E3 1650 @3.6 Ghz
+			\item Gebruikte GPU (OpenCL): AMD RX580 @1200 Mhz
+			\item Linux kernel 4.20.3 (Antergos default scheduler)
+			\item cpu-multi-thread implementatie is gebenchmarked met 6 cores op een 6 core machine
+		\end{itemize}
+	\end{frame}
+	
+	
+	\begin{frame}{Comparison of CPU implementations}
+		\begin{center}
+			\resizebox{!}{.7\paperheight}{\input{compareCpu.tex}}
+		\end{center}
+	\end{frame}
+
+	\begin{frame}{Compare different implementations (double)}
+		\begin{center}
+			\resizebox{!}{.7\paperheight}{\input{compareDifferentDouble.tex}}
+		\end{center}
+	\end{frame}	
+	
+	\begin{frame}{Speedup between different implementations (double)}
+		\begin{center}
+			\resizebox{!}{.7\paperheight}{\input{speedupDifferentDouble.tex}}
+		\end{center}
+	\end{frame}	
+	
+	\begin{frame}{Comparison of OpenCL implementations}
+		\begin{center}
+			\resizebox{!}{.7\paperheight}{\input{compareOpenCL.tex}}
+		\end{center}
+	\end{frame}
+
+	\begin{frame}{Speedup between OpenCL implementations}
 		\begin{center}
 			\resizebox{!}{.7\paperheight}{\input{speedupOpenCL.tex}}
 		\end{center}
 	\end{frame}
 	
-	\begin{frame}{Speedup between different implementations (double)}
-		\begin{center}
-			\resizebox{!}{.7\paperheight}{\input{speedupDouble.tex}}
-		\end{center}
-	\end{frame}
+
+
+
+
 %	\begin{frame}{Resultaten Brute Force Multithread: Speedup}
 %		\begin{center}
 %			\resizebox{!}{.7\paperheight}{\input{BFMTSpeedup.tex}}
@@ -149,35 +211,35 @@
 %		\end{center}
 %	\end{frame}
 
-	\defverbatim[colored]\codeBH{
-		\begin{lstlisting}
-		for body in bodies:
-			# traverses tree
-			newAcceleration = calculateAcceleration(body, root)  
-			updateVelocity(bodyA, newAcceleration)
-			updateAcceleration(bodyA, newAcceleration)
-		\end{lstlisting}
-	}
-
-	\begin{frame}{Barnes-Hut}
-		\note{
-			
-		}
-		\begin{itemize}
-			\item $O(n log(n))$
-			\item Deelt lichamen onder in octree
-			\item Het is niet nodig om krachten tussen elk paar lichamen te berekenen.
-			
-			 Schat verafgelegen lichamen af door het massacentrum
-			
-			\item Twee implementaties
-			\begin{itemize}
-				\item Iteratief gebruikmakend van space filling curve
-				\item Recursief
-			\end{itemize}
-		\end{itemize}
-		\codeBH
-	\end{frame}
+%	\defverbatim[colored]\codeBH{
+%		\begin{lstlisting}
+%		for body in bodies:
+%			# traverses tree
+%			newAcceleration = calculateAcceleration(body, root)  
+%			updateVelocity(bodyA, newAcceleration)
+%			updateAcceleration(bodyA, newAcceleration)
+%		\end{lstlisting}
+%	}
+%
+%	\begin{frame}{Barnes-Hut}
+%		\note{
+%			
+%		}
+%		\begin{itemize}
+%			\item $O(n log(n))$
+%			\item Deelt lichamen onder in octree
+%			\item Het is niet nodig om krachten tussen elk paar lichamen te berekenen.
+%			
+%			 Schat verafgelegen lichamen af door het massacentrum
+%			
+%			\item Twee implementaties
+%			\begin{itemize}
+%				\item Iteratief gebruikmakend van space filling curve
+%				\item Recursief
+%			\end{itemize}
+%		\end{itemize}
+%		\codeBH
+%	\end{frame}
 	
 %	\begin{frame}{Barnes-Hut algoritme}
 %		\begin{center}
@@ -216,11 +278,11 @@
 		\end{center}
 	\end{frame}
 	
-	\begin{frame}{Einde}
-		\begin{center}
-			Nog vragen?
-		\end{center}
-	\end{frame}
+%	\begin{frame}{Einde}
+%		\begin{center}
+%			Nog vragen?
+%		\end{center}
+%	\end{frame}
 	
 \end{document}
 
