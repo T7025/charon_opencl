@@ -244,9 +244,14 @@ void UniverseImpl<FP>::generateInternalNodes() {
     #pragma omp parallel for
     for (unsigned i = 0; i < treeSize - 1; ++i) {
         // Count leading zeroes long long
-        auto xorX = __builtin_clzll(tree[i].getSFCIndex().x ^ tree[i + 1].getSFCIndex().x);
-        auto xorY = __builtin_clzll(tree[i].getSFCIndex().y ^ tree[i + 1].getSFCIndex().y);
-        auto xorZ = __builtin_clzll(tree[i].getSFCIndex().z ^ tree[i + 1].getSFCIndex().z);
+        auto xorX = (tree[i].getSFCIndex().x ^ tree[i + 1].getSFCIndex().x);
+        auto xorY = (tree[i].getSFCIndex().y ^ tree[i + 1].getSFCIndex().y);
+        auto xorZ = (tree[i].getSFCIndex().z ^ tree[i + 1].getSFCIndex().z);
+
+        xorX = xorX == 0 ? 64 : __builtin_clzll(xorX);
+        xorY = xorY == 0 ? 64 : __builtin_clzll(xorY);
+        xorZ = xorZ == 0 ? 64 : __builtin_clzll(xorZ);
+
         auto depth = xorX < xorY ? xorX : xorY;
         depth = depth < xorZ ? depth : xorZ;
         depth = k - unsigned(sizeof(long long) * 8 - depth);
@@ -278,9 +283,14 @@ void UniverseImpl<FP>::establishParentChildRel() {
     #pragma omp parallel for
     for (unsigned i = 0; i < treeSize - 1; ++i) {
         auto shift = k - std::min(tree[i].getDepth(), tree[i + 1].getDepth());
-        auto xorX = __builtin_clzll(rshift(tree[i].getSFCIndex().x ^ tree[i + 1].getSFCIndex().x, shift));
-        auto xorY = __builtin_clzll(rshift(tree[i].getSFCIndex().y ^ tree[i + 1].getSFCIndex().y, shift));
-        auto xorZ = __builtin_clzll(rshift(tree[i].getSFCIndex().z ^ tree[i + 1].getSFCIndex().z, shift));
+        auto xorX = (rshift(tree[i].getSFCIndex().x ^ tree[i+1].getSFCIndex().x, shift));
+        auto xorY = (rshift(tree[i].getSFCIndex().y ^ tree[i+1].getSFCIndex().y, shift));
+        auto xorZ = (rshift(tree[i].getSFCIndex().z ^ tree[i+1].getSFCIndex().z, shift));
+
+        xorX = xorX == 0 ? 64 : __builtin_clzll(xorX);
+        xorY = xorY == 0 ? 64 : __builtin_clzll(xorY);
+        xorZ = xorZ == 0 ? 64 : __builtin_clzll(xorZ);
+
         auto depth = xorX < xorY ? xorX : xorY;
         depth = depth < xorZ ? depth : xorZ;
         depth = k - unsigned(sizeof(long long) * 8 - depth);

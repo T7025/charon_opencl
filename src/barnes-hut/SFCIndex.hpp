@@ -18,33 +18,16 @@ public:
     }
 
     bool operator<(const SFCIndex &other) const {
-        unsigned j = 0;
-        uintv t1 = 0;
-        uintv t2 = x ^other.x;
+        bool result = x < other.x;
+        uintv t1 = x ^ other.x;
+        uintv t2 = y ^ other.y;
         if (lessMSB(t1, t2)) {
-            j = 0;
-            t1 = t2;
-        }
-        t2 = y ^ other.y;
-        if (lessMSB(t1, t2)) {
-            j = 1;
+            result = y < other.y;
             t1 = t2;
         }
         t2 = z ^ other.z;
         if (lessMSB(t1, t2)) {
-            j = 2;
-        }
-        bool result;
-        switch (j) {
-            case 0:
-                result = x < other.x;
-                break;
-            case 1:
-                result = y < other.y;
-                break;
-            case 2:
-                result = z < other.z;
-                break;
+            result = z < other.z;
         }
         return result;
     }

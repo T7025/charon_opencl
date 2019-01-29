@@ -46,17 +46,19 @@ SCENARIO("Test the position update function", "[universe]") {
         };
 
 //        addSettings("algorithm", "brute-force", "barnes-hut");
-        addSettings("algorithm", "brute-force");
+//        addSettings("algorithm", "brute-force");
+        addSettings("algorithm", "barnes-hut");
 //        addSettings("algorithm", "barnes-hut");
         #ifdef CHARON_TRAVIS_TEST
         addSettings("platform", "cpu-single-thread", "cpu-multi-thread");
         #else
-        addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclloc", "openclvec");
+        addSettings("platform", "cpu-single-thread", "cpu-multi-thread");//, "opencl", "openclloc", "openclvec");
         #endif
 //        addSettings("platform", "cpu-single-thread");
         addSettings("floatingPointType", "float", "double");
 //        addSettings("floatingPointType", "float");
         addSettings("barnesHutCutoff", 0.0);
+        addSettings("numThreads", 6);
         addSettings("rngSeed", 1302);
 //        if (false)
         WHEN("Computing the evolution of a trivial single body system") {
@@ -116,7 +118,7 @@ SCENARIO("Test the position update function", "[universe]") {
             int numBodies = 128;
             double timeStep = 0.001;
 //            unsigned numSteps = 2;
-            unsigned numSteps = 2;
+            unsigned numSteps = 50;
 
             addSettings("numberOfBodies", numBodies);
             addSettings("timeStep", timeStep);

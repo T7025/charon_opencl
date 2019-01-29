@@ -80,7 +80,7 @@ void UniverseImpl<FP>::calculateNextAcc() {
     std::cout << "\n";*/
 
 
-    std::cout << tree <<"\n\n";
+    //std::cout << tree <<"\n\n";
     for (unsigned i = 0; i < tree.size(); ++i) {
         if (tree[i].isLeaf()) {
             Vec3<FP> newAcceleration = calculateAcceleration(tree[i]);
@@ -172,12 +172,12 @@ void UniverseImpl<FP>::buildTree() {
 //    std::cout << *this <<"\n";
 
     scalePositions();
-    std::cout << "Scaled positions" << std::endl;
-    std::cout << treeBoundingBox << std::endl;
-    std::cout << tree <<"\n";
+    //std::cout << "Scaled positions" << std::endl;
+    //std::cout << treeBoundingBox << std::endl;
+    //std::cout << tree <<"\n";
     calcSFCIndices();
-    std::cout << "Calculated SFCIndices" << std::endl;
-    std::cout << tree <<"\n";
+    //std::cout << "Calculated SFCIndices" << std::endl;
+    //std::cout << tree <<"\n";
 
     for (unsigned i = 0; i < tree.size() - 1; ++i) {
         if ((tree[i] == tree[i + 1])) {
@@ -187,17 +187,17 @@ void UniverseImpl<FP>::buildTree() {
     }
 
     generateInternalNodes();
-    std::cout << "Generated internal nodes" << std::endl;
-    std::cout << tree <<"\n";
+    //std::cout << "Generated internal nodes" << std::endl;
+    //std::cout << tree <<"\n";
     removeDuplicateInternalNodes();
-    std::cout << "Removed duplicate internal nodes" << std::endl;
-    std::cout << tree <<"\n";
+    //std::cout << "Removed duplicate internal nodes" << std::endl;
+    //std::cout << tree <<"\n";
     establishParentChildRel();
-    std::cout << "Established parent-child relation" << std::endl;
-    std::cout << tree <<"\n";
+    //std::cout << "Established parent-child relation" << std::endl;
+    //std::cout << tree <<"\n";
     calculateNodeData();
-    std::cout << "Calculated node data" << std::endl;
-    std::cout << tree <<"\n";
+    //std::cout << "Calculated node data" << std::endl;
+    //std::cout << tree <<"\n";
     treeIsBuilt = true;
 }
 
@@ -255,9 +255,14 @@ void UniverseImpl<FP>::generateInternalNodes() {
 
     for (unsigned i = 0; i < treeSize - 1; ++i) {
         // Count leading zeroes long long
-        auto xorX = __builtin_clzll(tree[i].getSFCIndex().x ^ tree[i + 1].getSFCIndex().x);
-        auto xorY = __builtin_clzll(tree[i].getSFCIndex().y ^ tree[i + 1].getSFCIndex().y);
-        auto xorZ = __builtin_clzll(tree[i].getSFCIndex().z ^ tree[i + 1].getSFCIndex().z);
+        auto xorX = (tree[i].getSFCIndex().x ^ tree[i + 1].getSFCIndex().x);
+        auto xorY = (tree[i].getSFCIndex().y ^ tree[i + 1].getSFCIndex().y);
+        auto xorZ = (tree[i].getSFCIndex().z ^ tree[i + 1].getSFCIndex().z);
+        
+        xorX = xorX == 0 ? 64 : __builtin_clzll(xorX);
+        xorY = xorY == 0 ? 64 : __builtin_clzll(xorY);
+        xorZ = xorZ == 0 ? 64 : __builtin_clzll(xorZ);
+        
         auto depth = xorX < xorY ? xorX : xorY;
         depth = depth < xorZ ? depth : xorZ;
         depth = k - unsigned(sizeof(long long) * 8 - depth);
@@ -287,10 +292,15 @@ void UniverseImpl<FP>::establishParentChildRel() {
     tree.resize(2 * treeSize - 1);
 
     for (unsigned i = 0; i < treeSize - 1; ++i) {
-        auto shift = k - std::min(tree[i].getDepth(), tree[i + 1].getDepth());
-        auto xorX = __builtin_clzll(rshift(tree[i].getSFCIndex().x ^ tree[i + 1].getSFCIndex().x, shift));
-        auto xorY = __builtin_clzll(rshift(tree[i].getSFCIndex().y ^ tree[i + 1].getSFCIndex().y, shift));
-        auto xorZ = __builtin_clzll(rshift(tree[i].getSFCIndex().z ^ tree[i + 1].getSFCIndex().z, shift));
+        auto shift = k - std::min(tree[i].getDepth(), tree[i+1].getDepth());
+        auto xorX = (rshift(tree[i].getSFCIndex().x ^ tree[i+1].getSFCIndex().x, shift));
+        auto xorY = (rshift(tree[i].getSFCIndex().y ^ tree[i+1].getSFCIndex().y, shift));
+        auto xorZ = (rshift(tree[i].getSFCIndex().z ^ tree[i+1].getSFCIndex().z, shift));
+
+        xorX = xorX == 0 ? 64 : __builtin_clzll(xorX);
+        xorY = xorY == 0 ? 64 : __builtin_clzll(xorY);
+        xorZ = xorZ == 0 ? 64 : __builtin_clzll(xorZ);
+
         auto depth = xorX < xorY ? xorX : xorY;
         depth = depth < xorZ ? depth : xorZ;
         depth = k - unsigned(sizeof(long long) * 8 - depth);
@@ -309,20 +319,19 @@ void UniverseImpl<FP>::establishParentChildRel() {
         tree[treeSize + i].getChildren()[0] = i;
     }
 
-    auto nodeCompWChildren = [](const Node<FP> &lhs, const Node<FP> &rhs) {
+    auto nodeCompWChildren = [](const Node<FP> &lhs, const Node<FP> &rhs){
         return lhs < rhs || (lhs == rhs && lhs.getChildren()[0] < rhs.getChildren()[0]);
     };
 
     std::sort(tree.begin() + treeSize, tree.end(), nodeCompWChildren);
 
     for (unsigned i = treeSize; i < tree.size(); ++i) {
-        if (i == tree.size() - 1 || !(tree[i] == tree[i + 1])) {
+        if (i == tree.size() - 1 || !(tree[i] == tree[i+1])) {
             unsigned j;
             for (j = 1; j < 8; ++j) {
                 if (tree[i] == tree[i - j] && i - j >= treeSize) {
                     tree[i].getChildren()[j] = tree[i - j].getChildren()[0];
-                }
-                else {
+                } else {
                     break;
                 }
             }

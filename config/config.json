@@ -1,16 +1,16 @@
 {
-  "enableFileOutput": true,
+  "enableFileOutput": false,
   "resultsDir": "results",
   "resultsFilenamePrefix": "out_",
-  "algorithm": "brute-force",
+  "algorithm": "barnes-hut",
   "barnesHutCutoff": 0.7,
-  "platform": "opencl",
+  "platform": "cpu-single-thread",
   "numThreads": 6,
   "openclCompileOpts": "-cl-fast-relaxed-math",
-  "floatingPointType": "float",
-  "numberOfBodies": 100000,
+  "floatingPointType": "double",
+  "numberOfBodies": 3,
   "timeStep": 0.001,
   "snapshotDelta": 50,
-  "nrOfSteps": 150000,
+  "nrOfSteps": 2,
   "softeningLength": 0.005
 }
