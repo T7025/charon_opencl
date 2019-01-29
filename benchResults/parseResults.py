@@ -131,7 +131,7 @@ makeGraph(
 makeGraph(
     "compareOpenCL",
     False,
-    lambda name: "opencl" in name,
+    lambda name: "opencl" in name and "brute-force" in name,
     """
     set logscale xy 2
     set grid xtics ytics
@@ -144,7 +144,7 @@ makeGraph(
 makeGraph(
     "speedupOpenCL",
     False,
-    lambda name: "opencl" in name,
+    lambda name: "opencl" in name and "brute-force" in name,
     """
     set logscale xy 2
     set grid xtics ytics

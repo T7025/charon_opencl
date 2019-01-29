@@ -77,16 +77,17 @@ std::vector<nlohmann::json> getSettings() {
         addSettingsImpl(addSettingsImpl, size, name, values...);
     };
 
-    addSettings("algorithm", "brute-force");//, "barnes-hut");
+//    addSettings("algorithm", "brute-force", "barnes-hut");
+    addSettings("algorithm", "barnes-hut");
     addSettings("floatingPointType", "float", "double");
     addSettings("numThreads", 6);
     addSettings("openclCompileOpts", "-cl-fast-relaxed-math");
-//    addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclloc", "openclvec");
-    addSettings("platform", "opencl", "openclloc", "openclvec");
+    addSettings("platform", "cpu-single-thread", "cpu-multi-thread", "opencl", "openclloc", "openclvec");
+//    addSettings("platform", "opencl", "openclloc", "openclvec");
     addSettings("timeStep", 0.001);
     addSettings("softeningLength", 0.005);
     addSettings("barnesHutCutoff", 0.7);
-    addSettings("numberOfBodies", /*128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768,*/ 65536, 131072, 262144);
+    addSettings("numberOfBodies", 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144);
 
     return settings;
 }
